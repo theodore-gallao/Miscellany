@@ -180,26 +180,6 @@ class StoryViewController: UIViewController {
         return label
     }()
     
-    private lazy var authorBarButtonItem: UIBarButtonItem = {
-        let size = CGSize(
-            width: 32,
-            height: 32)
-        let borderColor = UIColor(named: "Primary") ?? UIColor.clear
-        let image = UIImage(named: "Author Image") // TODO: Change to URL image
-        let circularImage = image?.circularImage(
-            size: size,
-            borderColor: borderColor)
-        let originalCircularImage = circularImage?.withRenderingMode(UIImage.RenderingMode.alwaysOriginal)
-        
-        let barButtonItem = UIBarButtonItem(
-            image: originalCircularImage,
-            style: UIBarButtonItem.Style.plain,
-            target: self,
-            action: #selector(self.handleAuthorBarButtonItem(_:)))
-        
-        return barButtonItem
-    }()
-    
     private lazy var textBarButtonItem: UIBarButtonItem = {
         let barButtonItem = UIBarButtonItem(
             image: UIImage(named: "Text"),
@@ -678,7 +658,7 @@ extension StoryViewController: UIViewControllerTransitioningDelegate {
 
 // MARK: Selectors
 extension StoryViewController {
-    @objc private func handleAuthorBarButtonItem(_ sender: UIBarButtonItem) {
+    @objc private func handleTapAuthor(_ sender: UITapGestureRecognizer) {
         
     }
     
