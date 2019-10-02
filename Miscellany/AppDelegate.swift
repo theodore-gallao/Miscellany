@@ -8,12 +8,25 @@
 
 import UIKit
 import CoreData
+import Firebase
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        // Configure Firebase
+        FirebaseApp.configure()
+        
+        // Configure Services
+        StoryService.shared.configure()
+        UserService.shared.configure()
+        ImageService.shared.configure()
+        
+        // Configure Managers
+        SettingsManager.shared.configure()
+        
         return true
     }
 

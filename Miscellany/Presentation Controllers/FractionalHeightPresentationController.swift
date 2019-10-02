@@ -86,24 +86,26 @@ extension FractionalHeightPresentationController {
     
     @objc private func handlePanPresentedView(_ sender: UIPanGestureRecognizer) {
         let yTranslation = max(0, sender.translation(in: sender.view).y)
+        let yVelocity = sender.velocity(in: sender.view).y
         let containerViewHeight = containerView?.frame.height ?? 0
         let presentedViewHeight = self.fractionalHeight * containerViewHeight
         let dismissThreshold = (self.fractionalHeight * presentedViewHeight) / 2
         let yOrigin = containerViewHeight * (1 - self.fractionalHeight)
-        
         if sender.state == .ended {
-            if yTranslation > dismissThreshold {
+            if yVelocity > 0 && yTranslation + yVelocity > dismissThreshold {
                 self.presentedViewController.dismiss(animated: true, completion: nil)
             } else {
-                UIView.animate(withDuration: 1 / 3) {
+                UIView.animate(withDuration: 1 / 3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 1, options: UIView.AnimationOptions.curveEaseOut, animations: {
                     self.presentedView?.frame.origin.y = containerViewHeight * (1 - self.fractionalHeight)
                     self.presentedView?.layoutIfNeeded()
-                }
+                }, completion: nil)
             }
         } else if sender.state == .changed {
             UIView.animate(withDuration: 0) {
-                self.presentedView?.frame.origin.y = yOrigin + yTranslation
-                self.presentedView?.layoutIfNeeded()
+                UIView.animate(withDuration: 1 / 3, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 1, options: UIView.AnimationOptions.curveEaseOut, animations: {
+                    self.presentedView?.frame.origin.y = yOrigin + yTranslation
+                    self.presentedView?.layoutIfNeeded()
+                }, completion: nil)
             }
         }
     }

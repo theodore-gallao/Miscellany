@@ -8,6 +8,19 @@
 
 import Foundation
 
+enum Genre: String, CaseIterable, Codable {
+    case all = "All"
+    case adventure = "Adventure"
+    case dystopian = "Dystopian"
+    case fantasy = "Fantasy"
+    case horror = "Horror"
+    case mystery = "Mystery"
+    case romance = "Romance"
+    case sciFi = "Sci-Fi"
+    case thriller = "Thriller"
+    case western = "Western"
+}
+
 struct StoryModel: Databasable {
     var id: String
     var dateCreated: Date
@@ -16,14 +29,17 @@ struct StoryModel: Databasable {
     var title: String
     var description: String
     var author: UserModel
-    var genres: [GenreModel]
-    var tags: [String]
+    var genre: Genre
+    var tags: [String]?
     
-    var coverImageUrl: URL?
     var text: String
     
-    var rating: Double
     var viewCount: Int
-    var commentCount: Int
+    var likeCount: Int
+    var dislikeCount: Int
     
+    var commentCount: Int
+    var comments: [CommentModel]?
+    
+    var awards: [AwardModel]?
 }

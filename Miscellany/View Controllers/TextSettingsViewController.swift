@@ -33,8 +33,7 @@ class TextSettingsViewController: UIViewController {
     private(set) var textSettings: TextSettings
     
     // MARK: Views
-    /// The blur effect view that will effectively be the background of this `UIViewController`
-    private let blurEffectView: UIVisualEffectView = {
+    let blurEffectView: UIVisualEffectView = {
         let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.regular)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.translatesAutoresizingMaskIntoConstraints = false
@@ -87,14 +86,14 @@ class TextSettingsViewController: UIViewController {
     }
     
     required init?(coder: NSCoder) {
-        self.textSettings = TextSettings()
-        
-        super.init(coder: coder)
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: View Controller States
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.view.backgroundColor = UIColor.clear
         
         self.view.addSubview(self.blurEffectView)
         self.view.addSubview(self.dragIndicatorView)
@@ -135,7 +134,7 @@ class TextSettingsViewController: UIViewController {
                 constant: 0),
             self.blurEffectView.bottomAnchor.constraint(
                 equalTo: self.view.bottomAnchor,
-                constant: 0)
+                constant: 0),
         ]
         
         self.dragIndicatorViewConstraints = [

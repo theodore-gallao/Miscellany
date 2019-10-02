@@ -15,5 +15,4 @@ struct UserModel: Databasable {
     
     var firstName: String
     var lastName: String
-    var imageUrl: URL?
 }

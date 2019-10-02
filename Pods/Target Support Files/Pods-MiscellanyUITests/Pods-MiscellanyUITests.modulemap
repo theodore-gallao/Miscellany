@@ -1,0 +1,6 @@
+framework module Pods_MiscellanyUITests {
+  umbrella header "Pods-MiscellanyUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
