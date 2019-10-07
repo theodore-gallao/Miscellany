@@ -18,8 +18,8 @@ class RankedStoryCollectionViewCell: RegularStoryCollectionViewCell {
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false
         
-        label.setContentHuggingPriority(UILayoutPriority.required, for: NSLayoutConstraint.Axis.horizontal)
-        label.setContentCompressionResistancePriority(UILayoutPriority.required, for: NSLayoutConstraint.Axis.horizontal)
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
         
         return label
     }()
@@ -47,39 +47,27 @@ class RankedStoryCollectionViewCell: RegularStoryCollectionViewCell {
         NSLayoutConstraint.deactivate(self.authorLabelConstraints)
         
         self.rankLabelConstraints = [
-            self.rankLabel.centerYAnchor
-                .constraint(equalTo: self.contentView.centerYAnchor, constant: 0),
-            self.rankLabel.leadingAnchor
-                .constraint(equalTo: self.contentView.leadingAnchor, constant: 0)
+            self.rankLabel.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor),
+            self.rankLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor)
         ]
         
         self.coverImageViewConstraints = [
-            self.coverImageView.topAnchor
-                .constraint(equalTo: self.contentView.topAnchor, constant: 0),
-            self.coverImageView.widthAnchor
-                .constraint(equalTo: self.coverImageView.heightAnchor, multiplier: (6 / 9)),
-            self.coverImageView.leadingAnchor
-                .constraint(equalTo: self.contentView.leadingAnchor, constant: 32),
-            self.coverImageView.bottomAnchor
-                .constraint(equalTo: self.contentView.bottomAnchor, constant: 0)
+            self.coverImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+            self.coverImageView.widthAnchor.constraint(equalTo: self.coverImageView.heightAnchor, multiplier: (6 / 9)),
+            self.coverImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 32),
+            self.coverImageView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
         ]
         
         self.titleLabelConstraints = [
-            self.titleLabel.bottomAnchor
-                .constraint(equalTo: self.contentView.centerYAnchor, constant: -1),
-            self.titleLabel.leadingAnchor
-                .constraint(equalTo: self.coverImageView.trailingAnchor, constant: 16),
-            self.titleLabel.trailingAnchor
-                .constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
+            self.titleLabel.bottomAnchor.constraint(equalTo: self.contentView.centerYAnchor, constant: -1),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.coverImageView.trailingAnchor, constant: 16),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
         ]
         
         self.authorLabelConstraints = [
-            self.authorLabel.topAnchor
-                .constraint(equalTo: self.contentView.centerYAnchor, constant: 1),
-            self.authorLabel.leadingAnchor
-                .constraint(equalTo: self.titleLabel.leadingAnchor, constant: 0),
-            self.authorLabel.trailingAnchor
-                .constraint(equalTo: self.titleLabel.trailingAnchor, constant: 0)
+            self.authorLabel.topAnchor.constraint(equalTo: self.contentView.centerYAnchor, constant: 1),
+            self.authorLabel.leadingAnchor.constraint(equalTo: self.titleLabel.leadingAnchor),
+            self.authorLabel.trailingAnchor.constraint(equalTo: self.titleLabel.trailingAnchor)
         ]
         
         NSLayoutConstraint.activate(self.rankLabelConstraints)

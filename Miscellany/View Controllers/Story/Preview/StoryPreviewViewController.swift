@@ -11,6 +11,7 @@ import UIKit
 
 class StoryPreviewViewController: BaseViewController {
     // MARK: Data Members
+    private let userService: UserService
     private let imageService: ImageService
     
     private var firstIndex: Int
@@ -24,20 +25,17 @@ class StoryPreviewViewController: BaseViewController {
             let isCompact = self.traitCollection.horizontalSizeClass == .compact
             let sizeClassConstant: CGFloat = isCompact ? 0 : marginedWidth * 0.2
             let width = marginedWidth - sizeClassConstant
-            let leftMargin = self.view.layoutMargins.left + (sizeClassConstant / 2)
-            let rightMargin = self.view.layoutMargins.right + (sizeClassConstant / 2)
             
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             
             let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(width), heightDimension: .fractionalHeight(1.0))
             let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitem: item, count: 1)
-            group.interItemSpacing = .fixed(10)
              
             let section = NSCollectionLayoutSection(group: group)
-            section.orthogonalScrollingBehavior = .groupPaging
-            section.interGroupSpacing = 10
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: leftMargin, bottom: 0, trailing: rightMargin)
+            section.orthogonalScrollingBehavior = .groupPagingCentered
+            section.interGroupSpacing = 4
+            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
             
             return section
         }
@@ -63,9 +61,10 @@ class StoryPreviewViewController: BaseViewController {
     internal var collectionViewConstraints = [NSLayoutConstraint]()
     
     // MARK: Initializers
-    init(firstIndex: Int, storyModels: [StoryModel], imageService: ImageService) {
+    init(firstIndex: Int, storyModels: [StoryModel], userService: UserService, imageService: ImageService) {
         self.firstIndex = firstIndex
         self.storyModels = storyModels
+        self.userService = userService
         self.imageService = imageService
         
         super.init(nibName: nil, bundle: nil)
@@ -82,12 +81,6 @@ class StoryPreviewViewController: BaseViewController {
         
         self.collectionView.reloadData()
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        self.view.layoutIfNeeded()
-    }
 }
 
 // MARK: Properties
@@ -95,8 +88,9 @@ extension StoryPreviewViewController {
     override func configureProperties() {
         super.configureProperties()
         
+        // Extend layout past navigation and tab bars
         self.extendedLayoutIncludesOpaqueBars = true
-        self.edgesForExtendedLayout = [.top, .bottom]
+        
     }
 }
 
@@ -113,25 +107,62 @@ extension StoryPreviewViewController {
     override func configureLayout() {
         super.configureLayout()
         
-        NSLayoutConstraint.deactivate(self.collectionViewConstraints)
-        
         self.collectionViewConstraints = [
-            self.collectionView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            self.collectionView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
             self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            self.collectionView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor)
         ]
+    }
+    
+    override func deactivateConstraints() {
+        super.deactivateConstraints()
+        
+        NSLayoutConstraint.deactivate(self.collectionViewConstraints)
+    }
+    
+    override func activateConstraints() {
+        super.activateConstraints()
         
         NSLayoutConstraint.activate(self.collectionViewConstraints)
     }
+    
+    override func configureLayoutForCompactSizeClass() {
+        super.configureLayoutForCompactSizeClass()
+        
+        self.viewRespectsSystemMinimumLayoutMargins = true
+        self.view.directionalLayoutMargins.leading = 8
+        self.view.directionalLayoutMargins.trailing = 8
+        
+        if let navigationController = self.navigationController {
+            navigationController.viewRespectsSystemMinimumLayoutMargins = true
+            navigationController.view.directionalLayoutMargins.leading = 8
+            navigationController.view.directionalLayoutMargins.trailing = 8
+            navigationController.navigationBar.directionalLayoutMargins.leading = 8
+            navigationController.navigationBar.directionalLayoutMargins.trailing = 8
+        }
+    }
+    
+    override func configureLayoutForRegularSizeClass() {
+        super.configureLayoutForRegularSizeClass()
+        
+        self.viewRespectsSystemMinimumLayoutMargins = false
+        self.view.directionalLayoutMargins.leading = 64
+        self.view.directionalLayoutMargins.trailing = 64
+        
+        if let navigationController = self.navigationController {
+            navigationController.viewRespectsSystemMinimumLayoutMargins = true
+            navigationController.view.directionalLayoutMargins.leading = 64
+            navigationController.view.directionalLayoutMargins.trailing = 64
+            navigationController.navigationBar.directionalLayoutMargins.leading = 64
+            navigationController.navigationBar.directionalLayoutMargins.trailing = 64
+        }
+    }
 }
 
-// MARK: Navigation
 extension StoryPreviewViewController {
     override func configureNavigation(_ animated: Bool) {
-        super.configureNavigation(animated)
-        
-        self.navigationItem.title = "Preview"
+        self.navigationItem.largeTitleDisplayMode = .never
         
         if let navigationController = self.navigationController {
             navigationController.setNavigationBarHidden(false, animated: animated)
@@ -189,9 +220,25 @@ extension StoryPreviewViewController: StoryPreviewCollectionViewCellDelegate {
             print("ERROR: Unable to find StoryModel")
             return
         }
-        let storyViewController = StoryViewController(storyModel: storyModel, textSettings: SettingsManager.shared.textSettings)
+        let storyViewController = StoryViewController(storyModel: storyModel, textSettings: SettingsManager.shared.textSettings, userService: self.userService, storyService: .shared)
         storyViewController.hidesBottomBarWhenPushed = true
         
         self.navigationController?.pushViewController(storyViewController, animated: true)
+    }
+    
+    func storyPreviewCollectionViewCell(_ storyPreviewCollectionViewCell: StoryPreviewCollectionViewCell, didTapReadingList sender: UIButton) {
+        if let currentUser = self.userService.currentUser {
+            print(currentUser.id)
+        } else {
+            self.userService.presentSignIn(in: self)
+        }
+    }
+    
+    func storyPreviewCollectionViewCell(_ storyPreviewCollectionViewCell: StoryPreviewCollectionViewCell, didTapLibrary sender: UIButton) {
+        if let currentUser = self.userService.currentUser {
+            print(currentUser.id)
+        } else {
+            self.userService.presentSignIn(in: self)
+        }
     }
 }

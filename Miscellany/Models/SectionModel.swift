@@ -15,10 +15,13 @@ enum SectionDisplayType: Int, Codable {
 }
 
 enum Section: String {
+    // Used for announcements attop of the home page
+    case announcements = "Announcements"
+    
     // Sections related only to the user
     case recentlyRead = "Recently Read"
     case recommendedForYou = "Recommended For You"
-    case newStories = "New Stories"
+    case newForYou = "New For You"
     
     // Ranked sections
     case topStories = "Top Stories"
@@ -48,9 +51,10 @@ struct SectionModel {
     
     static func displayType(for section: Section) -> SectionDisplayType {
         switch section {
+        case .announcements: return .large
         case .recentlyRead: return .regular
         case .recommendedForYou: return .regular
-        case .newStories: return .regular
+        case .newForYou: return .regular
         case .topStories: return .ranked
         case .trendingStories: return .ranked
         case .storiesLike: return .regular
@@ -68,9 +72,10 @@ struct SectionModel {
     
     static func description(for section: Section, genre: Genre?, storyName: String?) -> String {
         switch section {
+        case .announcements: return "Announcements"
         case .recentlyRead: return "Stories you might want to read again"
         case .recommendedForYou: return "We think you'll enjoy reading these stories"
-        case .newStories: return "Fresh from genres and authors your like"
+        case .newForYou: return "Fresh from genres and authors your like"
         case .topStories: return "The best stories from this week"
         case .trendingStories: return "These stories have been getting attention lately"
         case .storiesLike: return "If you liked \(storyName ?? ""), you might enjoy these stories"

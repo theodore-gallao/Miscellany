@@ -9,21 +9,74 @@
 import Foundation
 import UIKit
 
-class BaseTabBarController: UITabBarController {
-    override func viewDidLoad() {
+public class BaseTabBarController: UITabBarController {
+    
+    /// DO NOT CALL THIS!
+    override public func viewDidLoad() {
         super.viewDidLoad()
         
-        self.configureLayout()
+        self.configureViews()
+        self.configureProperties()
+        self.configureAdditional()
+        
+        self.layout()
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override public func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.configureNavigation(animated)
+    }
+    
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
+        self.layout()
+    }
+}
+
+extension BaseTabBarController: PropertyConfigurable {
+    public func configureProperties() {}
+}
+
+extension BaseTabBarController: LayoutConfigurable {
+    private func layout() {
+        self.deactivateConstraints()
+        
         self.configureLayout()
+        
+        if self.traitCollection.horizontalSizeClass == .compact {
+            self.configureLayoutForCompactSizeClass()
+        } else {
+            self.configureLayoutForRegularSizeClass()
+        }
+        
+        self.activateConstraints()
     }
     
-    /// Override this method to configure any layout constraints. This method will be called on viewDidLoad() and traitCollectionDidChange(), so it will account for initial layout as well as adaptive layout
+    public func configureViews() {}
+    
     public func configureLayout() {
-        
+        if self.traitCollection.horizontalSizeClass == .compact {
+            self.configureLayoutForCompactSizeClass()
+        } else {
+            self.configureLayoutForRegularSizeClass()
+        }
     }
+    
+    public func deactivateConstraints() {}
+    
+    public func activateConstraints() {}
+    
+    public func configureLayoutForCompactSizeClass() {}
+    
+    public func configureLayoutForRegularSizeClass() {}
+}
+
+extension BaseTabBarController: AdditionalConfigurable {
+    public func configureAdditional() {}
+}
+
+extension BaseTabBarController: NavigationConfigurable {
+    public func configureNavigation(_ animated: Bool) {}
 }

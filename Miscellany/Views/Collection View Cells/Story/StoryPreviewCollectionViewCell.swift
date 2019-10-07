@@ -11,6 +11,10 @@ import UIKit
 
 protocol StoryPreviewCollectionViewCellDelegate: class {
     func storyPreviewCollectionViewCell(_ storyPreviewCollectionViewCell: StoryPreviewCollectionViewCell, didTapRead sender: UIButton)
+    
+    func storyPreviewCollectionViewCell(_ storyPreviewCollectionViewCell: StoryPreviewCollectionViewCell, didTapReadingList sender: UIButton)
+    
+    func storyPreviewCollectionViewCell(_ storyPreviewCollectionViewCell: StoryPreviewCollectionViewCell, didTapLibrary sender: UIButton)
 }
 
 class StoryPreviewCollectionViewCell: RegularStoryCollectionViewCell {
@@ -218,24 +222,27 @@ class StoryPreviewCollectionViewCell: RegularStoryCollectionViewCell {
     }
     
     private func setInfoPanel(_ storyModel: StoryModel) {
+        let isCompact = self.traitCollection.horizontalSizeClass == .compact
+        let textSize: CGFloat = isCompact ? 14 : 16
+        
         let viewItem = InfoPanelItem(
             image: UIImage(systemName: "eye.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: UIImage.SymbolWeight.regular)),
             imageTintColor: UIColor(named: "Primary"),
             text: "\(storyModel.viewCount.formatted)",
             textColor: UIColor(named: "Primary"),
-            textFont: UIFont.systemFont(ofSize: 14, weight: .regular))
+            textFont: UIFont.systemFont(ofSize: textSize, weight: .regular))
         let ratingItem = InfoPanelItem(
-            image: UIImage(systemName: "hand.thumbsup.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: UIImage.SymbolWeight.regular)),
+            image: UIImage(systemName: "hand.thumbsup.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: textSize, weight: UIImage.SymbolWeight.regular)),
             imageTintColor: UIColor(named: "Primary"),
             text: "\(CGFloat(storyModel.likeCount) / CGFloat(max(1, storyModel.dislikeCount)))%",
             textColor: UIColor(named: "Primary"),
-            textFont: UIFont.systemFont(ofSize: 14, weight: .regular))
+            textFont: UIFont.systemFont(ofSize: textSize, weight: .regular))
         let commentsItem = InfoPanelItem(
             image: UIImage(systemName: "bubble.left.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 14, weight: UIImage.SymbolWeight.regular)),
             imageTintColor: UIColor(named: "Primary"),
             text: "\(storyModel.commentCount.formatted)",
             textColor: UIColor(named: "Primary"),
-            textFont: UIFont.systemFont(ofSize: 14, weight: .regular))
+            textFont: UIFont.systemFont(ofSize: textSize, weight: .regular))
         
         self.infoPanelView.set([viewItem, ratingItem, commentsItem])
     }
@@ -265,34 +272,15 @@ extension StoryPreviewCollectionViewCell {
         self.scrollView.addSubview(self.awardsView)
         self.scrollView.addSubview(self.descriptionLiteralLabel)
         self.scrollView.addSubview(self.descriptionLabel)
-        
-        self.titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .heavy)
     }
     
     // Layout for any size class
     override func configureLayout() {
         super.configureLayout()
         
-        if self.traitCollection.horizontalSizeClass == .compact {
-            self.configureLayoutForCompactSizeClass()
-            self.titleLabel.textAlignment = .center
-            self.authorLabel.textAlignment = .center
-        } else {
-            self.configureLayoutForRegularSizeClass()
-            self.titleLabel.textAlignment = .natural
-            self.authorLabel.textAlignment = .natural
+        if let storyModel = self.storyModel {
+            self.setInfoPanel(storyModel)
         }
-        
-        NSLayoutConstraint.deactivate(self.scrollViewConstraints)
-        NSLayoutConstraint.deactivate(self.scrollBackgroundViewConstraints)
-        NSLayoutConstraint.deactivate(self.authorLabelConstraints)
-        NSLayoutConstraint.deactivate(self.authorImageViewConstraints)
-        NSLayoutConstraint.deactivate(self.authorImageBorderViewConstraints)
-        NSLayoutConstraint.deactivate(self.readingListButtonConstraints)
-        NSLayoutConstraint.deactivate(self.libraryButtonConstraints)
-        NSLayoutConstraint.deactivate(self.awardsViewConstraints)
-        NSLayoutConstraint.deactivate(self.descriptionLiteralLabelConstraints)
-        NSLayoutConstraint.deactivate(self.descriptionLabelConstraints)
         
         self.scrollViewConstraints = [
             self.scrollView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
@@ -302,7 +290,7 @@ extension StoryPreviewCollectionViewCell {
         ]
         
         self.scrollBackgroundViewConstraints = [
-            self.scrollBackgroundView.topAnchor.constraint(equalTo: self.scrollView.topAnchor, constant: 10),
+            self.scrollBackgroundView.topAnchor.constraint(equalTo: self.scrollView.topAnchor, constant: 4),
             self.scrollBackgroundView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
             self.scrollBackgroundView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
             self.scrollBackgroundView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
@@ -324,7 +312,7 @@ extension StoryPreviewCollectionViewCell {
         self.authorImageBorderViewConstraints = [
             self.authorImageBorderView.heightAnchor.constraint(equalToConstant: 44),
             self.authorImageBorderView.widthAnchor.constraint(equalToConstant: 44),
-            self.authorImageBorderView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
+            self.authorImageBorderView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
             self.authorImageBorderView.centerYAnchor.constraint(equalTo: self.readButton.centerYAnchor)
         ]
         
@@ -350,36 +338,32 @@ extension StoryPreviewCollectionViewCell {
         ]
         
         self.descriptionLiteralLabelConstraints = [
-            self.descriptionLiteralLabel.topAnchor.constraint(equalTo: self.awardsView.bottomAnchor, constant: 20),
+            self.descriptionLiteralLabel.topAnchor.constraint(equalTo: self.awardsView.bottomAnchor, constant: self.storyModel?.awards?.isEmpty ?? true ? 0 : 20),
             self.descriptionLiteralLabel.leadingAnchor.constraint(equalTo: self.authorImageBorderView.leadingAnchor),
             self.descriptionLiteralLabel.trailingAnchor.constraint(equalTo: self.readButton.trailingAnchor),
         ]
         
         self.descriptionLabelConstraints = [
             self.descriptionLabel.topAnchor.constraint(greaterThanOrEqualTo: self.descriptionLiteralLabel.bottomAnchor, constant: 16),
-            self.descriptionLabel.leadingAnchor.constraint(equalTo: self.readingListButton.leadingAnchor),
-            self.descriptionLabel.trailingAnchor.constraint(equalTo: self.readButton.trailingAnchor),
+            self.descriptionLabel.leadingAnchor.constraint(equalTo: self.descriptionLiteralLabel.leadingAnchor),
+            self.descriptionLabel.trailingAnchor.constraint(equalTo: self.descriptionLiteralLabel.trailingAnchor),
             self.descriptionLabel.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor, constant: -32)
         ]
-        
-        NSLayoutConstraint.activate(self.scrollViewConstraints)
-        NSLayoutConstraint.activate(self.scrollBackgroundViewConstraints)
-        NSLayoutConstraint.activate(self.authorLabelConstraints)
-        NSLayoutConstraint.activate(self.authorImageViewConstraints)
-        NSLayoutConstraint.activate(self.authorImageBorderViewConstraints)
-        NSLayoutConstraint.activate(self.readingListButtonConstraints)
-        NSLayoutConstraint.activate(self.libraryButtonConstraints)
-        NSLayoutConstraint.activate(self.awardsViewConstraints)
-        NSLayoutConstraint.activate(self.descriptionLiteralLabelConstraints)
-        NSLayoutConstraint.activate(self.descriptionLabelConstraints)
     }
     
     // Layout for compact size class
-    private func configureLayoutForCompactSizeClass() {
-        NSLayoutConstraint.deactivate(self.readButtonConstraints)
-        NSLayoutConstraint.deactivate(self.coverImageViewConstraints)
-        NSLayoutConstraint.deactivate(self.titleLabelConstraints)
-        NSLayoutConstraint.deactivate(self.infoPanelViewConstraints)
+    override func configureLayoutForCompactSizeClass() {
+        super.configureLayoutForCompactSizeClass()
+        
+        self.titleLabel.font = UIFont.systemFont(ofSize: 20, weight: .heavy)
+        self.titleLabel.textAlignment = .center
+        
+        self.authorLabel.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        self.authorLabel.textAlignment = .center
+        
+        self.descriptionLiteralLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        
+        self.descriptionLabel.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         
         self.coverImageViewConstraints = [
             self.coverImageView.topAnchor.constraint(equalTo: self.scrollBackgroundView.topAnchor, constant: 24),
@@ -390,8 +374,8 @@ extension StoryPreviewCollectionViewCell {
         
         self.titleLabelConstraints = [
             self.titleLabel.topAnchor.constraint(equalTo: self.coverImageView.bottomAnchor, constant: 20),
-            self.titleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 24),
-            self.titleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -24),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
         ]
         
         self.infoPanelViewConstraints = [
@@ -406,59 +390,106 @@ extension StoryPreviewCollectionViewCell {
             self.readButton.leadingAnchor.constraint(equalTo: self.authorImageBorderView.trailingAnchor, constant: 10),
             self.readButton.trailingAnchor.constraint(equalTo: self.titleLabel.trailingAnchor, constant: 0),
         ]
-        
-        NSLayoutConstraint.activate(self.coverImageViewConstraints)
-        NSLayoutConstraint.activate(self.readButtonConstraints)
-        NSLayoutConstraint.activate(self.titleLabelConstraints)
-        NSLayoutConstraint.activate(self.infoPanelViewConstraints)
     }
     
     // Layout for regular size class
-    private func configureLayoutForRegularSizeClass() {
-        NSLayoutConstraint.deactivate(self.readButtonConstraints)
-        NSLayoutConstraint.deactivate(self.coverImageViewConstraints)
-        NSLayoutConstraint.deactivate(self.titleLabelConstraints)
-        NSLayoutConstraint.deactivate(self.infoPanelViewConstraints)
-        NSLayoutConstraint.deactivate(self.descriptionLiteralLabelConstraints)
+    override func configureLayoutForRegularSizeClass() {
+        super.configureLayoutForRegularSizeClass()
+        
+        self.titleLabel.font = UIFont.systemFont(ofSize: 24, weight: .heavy)
+        self.titleLabel.textAlignment = .natural
+        
+        self.authorLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        self.authorLabel.textAlignment = .natural
+        
+        self.descriptionLiteralLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        
+        self.descriptionLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         
         self.coverImageViewConstraints = [
-            self.coverImageView.topAnchor.constraint(equalTo: self.scrollView.topAnchor, constant: 16),
-            self.coverImageView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 0.5, constant: -5),
-            self.coverImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+            self.coverImageView.topAnchor.constraint(equalTo: self.scrollView.topAnchor, constant: 44),
+            self.coverImageView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, multiplier: 1 / 3),
+            self.coverImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 44),
             self.coverImageView.heightAnchor.constraint(equalTo: self.coverImageView.widthAnchor, multiplier: (9 / 6))
         ]
         
         self.titleLabelConstraints = [
-            self.titleLabel.topAnchor.constraint(equalTo: self.coverImageView.topAnchor, constant: 0),
-            self.titleLabel.leadingAnchor.constraint(equalTo: self.coverImageView.trailingAnchor, constant: 10),
-            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16),
+            self.titleLabel.topAnchor.constraint(equalTo: self.coverImageView.topAnchor, constant: 10),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.coverImageView.trailingAnchor, constant: 32),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -44),
         ]
         
         self.infoPanelViewConstraints = [
-            self.infoPanelView.heightAnchor.constraint(equalToConstant: 20),
+            self.infoPanelView.heightAnchor.constraint(equalToConstant: 22),
             self.infoPanelView.topAnchor.constraint(equalTo: self.authorLabel.bottomAnchor, constant: 16),
             self.infoPanelView.leadingAnchor.constraint(equalTo: self.titleLabel.leadingAnchor, constant: 0),
             self.infoPanelView.trailingAnchor.constraint(lessThanOrEqualTo: self.titleLabel.trailingAnchor, constant: 0)
         ]
         
+        self.authorImageBorderViewConstraints = [
+            self.authorImageBorderView.heightAnchor.constraint(equalToConstant: 44),
+            self.authorImageBorderView.widthAnchor.constraint(equalToConstant: 44),
+            self.authorImageBorderView.leadingAnchor.constraint(equalTo: self.coverImageView.trailingAnchor, constant: 32),
+            self.authorImageBorderView.centerYAnchor.constraint(equalTo: self.readButton.centerYAnchor)
+        ]
+        
         self.readButtonConstraints = [
             self.readButton.heightAnchor.constraint(equalToConstant: 44),
             self.readButton.leadingAnchor.constraint(equalTo: self.authorImageBorderView.trailingAnchor, constant: 10),
-            self.readButton.trailingAnchor.constraint(equalTo: self.titleLabel.trailingAnchor, constant: 0),
-            self.readButton.topAnchor.constraint(equalTo: self.coverImageView.bottomAnchor, constant: 24)
+            self.readButton.trailingAnchor.constraint(equalTo: self.titleLabel.trailingAnchor, constant: 0)
+        ]
+        
+        self.libraryButtonConstraints = [
+            self.libraryButton.heightAnchor.constraint(equalToConstant: 44),
+            self.libraryButton.topAnchor.constraint(equalTo: self.readButton.bottomAnchor, constant: 10),
+            self.libraryButton.leadingAnchor.constraint(equalTo: self.readingListButton.trailingAnchor, constant: 10),
+            self.libraryButton.trailingAnchor.constraint(equalTo: self.readButton.trailingAnchor),
+            self.libraryButton.bottomAnchor.constraint(equalTo: self.coverImageView.bottomAnchor)
         ]
         
         self.descriptionLiteralLabelConstraints = [
-            self.descriptionLiteralLabel.topAnchor.constraint(equalTo: self.readButton.bottomAnchor, constant: 24),
+            self.descriptionLiteralLabel.topAnchor.constraint(equalTo: self.awardsView.bottomAnchor, constant: self.storyModel?.awards?.isEmpty ?? true ? 0 : 20),
             self.descriptionLiteralLabel.leadingAnchor.constraint(equalTo: self.coverImageView.leadingAnchor, constant: 0),
             self.descriptionLiteralLabel.trailingAnchor.constraint(equalTo: self.titleLabel.trailingAnchor, constant: 0),
         ]
+    }
+    
+    override func deactivateConstraints() {
+        super.deactivateConstraints()
         
+        NSLayoutConstraint.deactivate(self.scrollViewConstraints)
+        NSLayoutConstraint.deactivate(self.scrollBackgroundViewConstraints)
+        NSLayoutConstraint.deactivate(self.coverImageViewConstraints)
+        NSLayoutConstraint.deactivate(self.titleLabelConstraints)
+        NSLayoutConstraint.deactivate(self.authorLabelConstraints)
+        NSLayoutConstraint.deactivate(self.infoPanelViewConstraints)
+        NSLayoutConstraint.deactivate(self.authorImageViewConstraints)
+        NSLayoutConstraint.deactivate(self.authorImageBorderViewConstraints)
+        NSLayoutConstraint.deactivate(self.readButtonConstraints)
+        NSLayoutConstraint.deactivate(self.readingListButtonConstraints)
+        NSLayoutConstraint.deactivate(self.libraryButtonConstraints)
+        NSLayoutConstraint.deactivate(self.awardsViewConstraints)
+        NSLayoutConstraint.deactivate(self.descriptionLiteralLabelConstraints)
+        NSLayoutConstraint.deactivate(self.descriptionLabelConstraints)
+    }
+    
+    override func activateConstraints() {
+        super.activateConstraints()
+        
+        NSLayoutConstraint.activate(self.scrollViewConstraints)
+        NSLayoutConstraint.activate(self.scrollBackgroundViewConstraints)
         NSLayoutConstraint.activate(self.coverImageViewConstraints)
-        NSLayoutConstraint.activate(self.readButtonConstraints)
         NSLayoutConstraint.activate(self.titleLabelConstraints)
+        NSLayoutConstraint.activate(self.authorLabelConstraints)
         NSLayoutConstraint.activate(self.infoPanelViewConstraints)
+        NSLayoutConstraint.activate(self.authorImageViewConstraints)
+        NSLayoutConstraint.activate(self.authorImageBorderViewConstraints)
+        NSLayoutConstraint.activate(self.readButtonConstraints)
+        NSLayoutConstraint.activate(self.readingListButtonConstraints)
+        NSLayoutConstraint.activate(self.libraryButtonConstraints)
+        NSLayoutConstraint.activate(self.awardsViewConstraints)
         NSLayoutConstraint.activate(self.descriptionLiteralLabelConstraints)
+        NSLayoutConstraint.activate(self.descriptionLabelConstraints)
     }
 }
 
@@ -469,10 +500,10 @@ extension StoryPreviewCollectionViewCell {
     }
     
     @objc private func handleTapReadingListButton(_ sender: UIButton) {
-        
+        self.delegate?.storyPreviewCollectionViewCell(self, didTapReadingList: sender)
     }
     
     @objc private func handleTapLibraryButton(_ sender: UIButton) {
-        
+        self.delegate?.storyPreviewCollectionViewCell(self, didTapLibrary: sender)
     }
 }

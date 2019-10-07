@@ -16,5 +16,7 @@ extension UICollectionViewCell {
         case ranked = "RANKED_COLLECTION_VIEW_CELL_ID"
         case preview = "PREVIEW_COLLECTION_VIEW_CELL_ID"
         case award = "AWARD_COLLECTION_VIEW_CELL_ID"
+        case announcement = "ANNOUNCEMENT_COLLECTION_VIEW_CELL_ID"
+        case featureInfo = "FEATURE_INFO_COLLECTION_VIEW_CELL_ID"
     }
 }

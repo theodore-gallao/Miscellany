@@ -11,14 +11,6 @@ import UIKit
 
 // MARK: Declaration, Data Members, & Initializers
 class HeaderCollectionReusableView: BaseCollectionReusableView {
-    // Views
-    private let topSeparatorView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(named: "Empty")
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
-        return view
-    }()
     
     internal let titleLabel: UILabel = {
         let label = UILabel()
@@ -59,7 +51,6 @@ class HeaderCollectionReusableView: BaseCollectionReusableView {
     }()
     
     // Constraints
-    internal var topSeparatorViewConstraints = [NSLayoutConstraint]()
     internal var titleLabelConstraints = [NSLayoutConstraint]()
     internal var subtitleLabelConstraints = [NSLayoutConstraint]()
     internal var moreArrowImageViewConstraints = [NSLayoutConstraint]()
@@ -68,7 +59,6 @@ class HeaderCollectionReusableView: BaseCollectionReusableView {
     override func commonInit() {
         super.commonInit()
         
-        self.addSubview(self.topSeparatorView)
         self.addSubview(self.titleLabel)
         self.addSubview(self.subtitleLabel)
         self.addSubview(self.moreArrowImageView)
@@ -92,29 +82,21 @@ extension HeaderCollectionReusableView {
     }
     
     private func configureLayout() {
-        NSLayoutConstraint.deactivate(self.topSeparatorViewConstraints)
         NSLayoutConstraint.deactivate(self.titleLabelConstraints)
         NSLayoutConstraint.deactivate(self.subtitleLabelConstraints)
         NSLayoutConstraint.deactivate(self.moreArrowImageViewConstraints)
         
-        self.topSeparatorViewConstraints = [
-            self.topSeparatorView.heightAnchor.constraint(equalToConstant: 0.75),
-            self.topSeparatorView.topAnchor.constraint(equalTo: self.topAnchor, constant: 0),
-            self.topSeparatorView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 0),
-            self.topSeparatorView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 0),
-        ]
-        
         self.titleLabelConstraints = [
-            self.titleLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 12),
-            self.titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 0),
-            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 0)
+            self.titleLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 10),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor)
         ]
         
         self.subtitleLabelConstraints = [
             self.subtitleLabel.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 2),
-            self.subtitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 0),
-            self.subtitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 0),
-            self.subtitleLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -12)
+            self.subtitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            self.subtitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            self.subtitleLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -10)
         ]
         
         self.moreArrowImageViewConstraints = [
@@ -123,7 +105,6 @@ extension HeaderCollectionReusableView {
             self.moreArrowImageView.centerYAnchor.constraint(equalTo: self.centerYAnchor,constant: 0)
         ]
         
-        NSLayoutConstraint.activate(self.topSeparatorViewConstraints)
         NSLayoutConstraint.activate(self.titleLabelConstraints)
         NSLayoutConstraint.activate(self.subtitleLabelConstraints)
         NSLayoutConstraint.activate(self.moreArrowImageViewConstraints)

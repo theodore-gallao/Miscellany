@@ -89,10 +89,6 @@ class RegularStoryCollectionViewCell: BaseCollectionViewCell {
     override func configureLayout() {
         super.configureLayout()
         
-        NSLayoutConstraint.deactivate(self.coverImageViewConstraints)
-        NSLayoutConstraint.deactivate(self.titleLabelConstraints)
-        NSLayoutConstraint.deactivate(self.authorLabelConstraints)
-        
         self.coverImageViewConstraints = [
             self.coverImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 0),
             self.coverImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 0),
@@ -114,6 +110,18 @@ class RegularStoryCollectionViewCell: BaseCollectionViewCell {
             self.authorLabel.trailingAnchor
                 .constraint(equalTo: self.coverImageView.trailingAnchor, constant: 0)
         ]
+    }
+    
+    override func deactivateConstraints() {
+        super.deactivateConstraints()
+        
+        NSLayoutConstraint.deactivate(self.coverImageViewConstraints)
+        NSLayoutConstraint.deactivate(self.titleLabelConstraints)
+        NSLayoutConstraint.deactivate(self.authorLabelConstraints)
+    }
+    
+    override func activateConstraints() {
+        super.activateConstraints()
         
         NSLayoutConstraint.activate(self.coverImageViewConstraints)
         NSLayoutConstraint.activate(self.titleLabelConstraints)

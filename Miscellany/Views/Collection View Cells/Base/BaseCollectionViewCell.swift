@@ -25,22 +25,41 @@ class BaseCollectionViewCell: UICollectionViewCell {
     
     private func commonInit() {
         self.configureViews()
-        self.configureLayout()
+        
+        self.layout()
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        self.configureLayout()
+        self.layout()
     }
 }
 
 extension BaseCollectionViewCell: LayoutConfigurable {
-    open func configureViews() {
-        // Override this!
+    private func layout() {
+        self.deactivateConstraints()
+        
+        self.configureLayout()
+        
+        if self.traitCollection.horizontalSizeClass == .compact {
+            self.configureLayoutForCompactSizeClass()
+        } else {
+            self.configureLayoutForRegularSizeClass()
+        }
+        
+        self.activateConstraints()
     }
     
-    open func configureLayout() {
-        // Override this!
-    }
+    public func configureViews() {}
+    
+    public func configureLayout() {}
+    
+    public func deactivateConstraints() {}
+    
+    public func activateConstraints() {}
+    
+    public func configureLayoutForCompactSizeClass() {}
+    
+    public func configureLayoutForRegularSizeClass() {}
 }

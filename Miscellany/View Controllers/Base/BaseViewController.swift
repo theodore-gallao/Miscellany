@@ -20,6 +20,14 @@ import UIKit
     
     /// Override this method to configure any layout constraints. This method will be called on viewDidLoad() and traitCollectionDidChange(), so it will account for initial layout as well as adaptive layout
     func configureLayout()
+    
+    func deactivateConstraints()
+    
+    func activateConstraints()
+    
+    func configureLayoutForCompactSizeClass()
+    
+    func configureLayoutForRegularSizeClass()
 }
 
 @objc public protocol AdditionalConfigurable {
@@ -40,8 +48,9 @@ public class BaseViewController: UIViewController {
         
         self.configureViews()
         self.configureProperties()
-        self.configureLayout()
         self.configureAdditional()
+        
+        self.layout()
     }
     
     override public func viewWillAppear(_ animated: Bool) {
@@ -53,7 +62,7 @@ public class BaseViewController: UIViewController {
     override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        self.configureLayout()
+        self.layout()
     }
 }
 
@@ -62,9 +71,37 @@ extension BaseViewController: PropertyConfigurable {
 }
 
 extension BaseViewController: LayoutConfigurable {
+    private func layout() {
+        self.deactivateConstraints()
+        
+        self.configureLayout()
+        
+        if self.traitCollection.horizontalSizeClass == .compact {
+            self.configureLayoutForCompactSizeClass()
+        } else {
+            self.configureLayoutForRegularSizeClass()
+        }
+        
+        self.activateConstraints()
+    }
+    
     public func configureViews() {}
     
-    public func configureLayout() {}
+    public func configureLayout() {
+        if self.traitCollection.horizontalSizeClass == .compact {
+            self.configureLayoutForCompactSizeClass()
+        } else {
+            self.configureLayoutForRegularSizeClass()
+        }
+    }
+    
+    public func deactivateConstraints() {}
+    
+    public func activateConstraints() {}
+    
+    public func configureLayoutForCompactSizeClass() {}
+    
+    public func configureLayoutForRegularSizeClass() {}
 }
 
 extension BaseViewController: AdditionalConfigurable {

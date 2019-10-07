@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 class AwardCollectionViewCell: BaseCollectionViewCell {
-    
+    // TODO: Implement this!!!
 }
 
 extension AwardCollectionViewCell {

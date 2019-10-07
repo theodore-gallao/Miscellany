@@ -16,14 +16,6 @@ protocol AwardsViewDelegate {
 class AwardsView: BaseView {
     private(set) var awards: [AwardModel] = []
     
-    private let topSeparatorView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(named: "Empty")
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
-        return view
-    }()
-    
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: self.collectionViewCompositionalLayout)
         collectionView.backgroundColor = .clear
@@ -63,17 +55,7 @@ class AwardsView: BaseView {
         }
     }()
     
-    private let bottomSeparatorView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(named: "Empty")
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
-        return view
-    }()
-    
-    private var topSeparatorViewConstraints = [NSLayoutConstraint]()
     private var collectionViewConstraints = [NSLayoutConstraint]()
-    private var bottomSeparatorViewConstraints = [NSLayoutConstraint]()
     
     func set(_ awards: [AwardModel]) {
         self.awards = awards
@@ -86,25 +68,13 @@ extension AwardsView {
     override func configureViews() {
         super.configureViews()
         
-        self.addSubview(self.topSeparatorView)
         self.addSubview(self.collectionView)
-        self.addSubview(self.bottomSeparatorView)
     }
     
     override func configureLayout() {
         super.configureLayout()
         
-        NSLayoutConstraint.deactivate(self.topSeparatorViewConstraints)
         NSLayoutConstraint.deactivate(self.collectionViewConstraints)
-        NSLayoutConstraint.deactivate(self.bottomSeparatorViewConstraints)
-        
-        self.topSeparatorViewConstraints = [
-            self.topSeparatorView.heightAnchor.constraint(equalToConstant: 0.75),
-            self.topSeparatorView.topAnchor.constraint(equalTo: self.topAnchor),
-            self.topSeparatorView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            self.topSeparatorView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-        ]
-        
         self.collectionViewConstraints = [
             self.collectionView.topAnchor.constraint(equalTo: self.topAnchor),
             self.collectionView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
@@ -112,16 +82,7 @@ extension AwardsView {
             self.collectionView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ]
         
-        self.bottomSeparatorViewConstraints = [
-            self.bottomSeparatorView.heightAnchor.constraint(equalToConstant: 0.75),
-            self.bottomSeparatorView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            self.bottomSeparatorView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            self.bottomSeparatorView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-        ]
-        
-        NSLayoutConstraint.activate(self.topSeparatorViewConstraints)
         NSLayoutConstraint.activate(self.collectionViewConstraints)
-        NSLayoutConstraint.activate(self.bottomSeparatorViewConstraints)
     }
 }
 

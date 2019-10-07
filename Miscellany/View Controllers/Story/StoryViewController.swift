@@ -12,6 +12,10 @@ import UIKit
 class StoryViewController: BaseViewController {
     // MARK: Data Members & Initializers
     
+    // Services
+    let userService: UserService
+    let storyService: StoryService
+    
     // Data
     let storyModel: StoryModel
     let textSettings: TextSettings
@@ -131,9 +135,11 @@ class StoryViewController: BaseViewController {
     }()
     
     // MARK: Initializers
-    init(storyModel: StoryModel, textSettings: TextSettings) {
+    init(storyModel: StoryModel, textSettings: TextSettings, userService: UserService, storyService: StoryService) {
         self.storyModel = storyModel
         self.textSettings = textSettings
+        self.userService = userService
+        self.storyService = storyService
         
         super.init(nibName: nil, bundle: nil)
         
@@ -185,15 +191,10 @@ extension StoryViewController {
         self.scrollView.addSubview(self.titleLabel)
         self.scrollView.addSubview(self.authorNameLabel)
         self.scrollView.addSubview(self.textLabel)
-        
     }
+    
     override func configureLayout() {
         super.configureLayout()
-        
-        NSLayoutConstraint.deactivate(self.scrollViewConstraints)
-        NSLayoutConstraint.deactivate(self.titleLabelConstraints)
-        NSLayoutConstraint.deactivate(self.authorNameLabelConstraints)
-        NSLayoutConstraint.deactivate(self.textLabelConstraints)
         
         self.scrollViewConstraints = [
             self.scrollView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 0),
@@ -220,6 +221,19 @@ extension StoryViewController {
             self.textLabel.trailingAnchor.constraint(equalTo: self.view.layoutMarginsGuide.trailingAnchor, constant: 0),
             self.textLabel.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor, constant: -32)
         ]
+    }
+    
+    override func deactivateConstraints() {
+        super.deactivateConstraints()
+        
+        NSLayoutConstraint.deactivate(self.scrollViewConstraints)
+        NSLayoutConstraint.deactivate(self.titleLabelConstraints)
+        NSLayoutConstraint.deactivate(self.authorNameLabelConstraints)
+        NSLayoutConstraint.deactivate(self.textLabelConstraints)
+    }
+    
+    override func activateConstraints() {
+        super.activateConstraints()
         
         NSLayoutConstraint.activate(self.scrollViewConstraints)
         NSLayoutConstraint.activate(self.titleLabelConstraints)
@@ -389,6 +403,11 @@ extension StoryViewController: UIViewControllerTransitioningDelegate {
     }
 }
 
+// MARK: Sign In View Controller
+extension StoryViewController {
+    
+}
+
 // MARK: Selectors
 extension StoryViewController {
     @objc private func handleTextBarButtonItem(_ sender: UIBarButtonItem) {
@@ -411,10 +430,22 @@ extension StoryViewController {
     
     @objc private func handleLikeBarButtonItem(_ sender: UIBarButtonItem) {
         print("tap like")
+        
+        if let currentUser = self.userService.currentUser {
+            print(currentUser.id)
+        } else {
+            self.userService.presentSignIn(in: self)
+        }
     }
     
     @objc private func handleDislikeBarButtonItem(_ sender: UIBarButtonItem) {
         print("tap dislike")
+        
+        if let currentUser = self.userService.currentUser {
+            print(currentUser.id)
+        } else {
+            self.userService.presentSignIn(in: self)
+        }
     }
     
     @objc private func handleCommentBarButtonItem(_ sender: UIBarButtonItem) {

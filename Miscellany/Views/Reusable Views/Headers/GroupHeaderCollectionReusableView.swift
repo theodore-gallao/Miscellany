@@ -27,7 +27,7 @@ class GroupHeaderCollectionReusableView: BaseCollectionReusableView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.backgroundColor = UIColor.clear
-        label.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.bold)
+        label.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.heavy)
         label.textColor = UIColor(named: "Text")
         label.textAlignment = .natural
         label.translatesAutoresizingMaskIntoConstraints = false

@@ -26,22 +26,37 @@ class BaseView: UIView {
     
     private func commonInit() {
         self.configureViews()
+        
+        self.deactivateConstraints()
         self.configureLayout()
+        self.activateConstraints()
     }
     
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
+        self.deactivateConstraints()
         self.configureLayout()
+        self.activateConstraints()
     }
 }
 
 extension BaseView: LayoutConfigurable {
-    open func configureViews() {
-        // Override this!
-    }
+    open func configureViews() {}
 
-    open func configureLayout() {
-        // Override this!
+    public func configureLayout() {
+        if self.traitCollection.horizontalSizeClass == .compact {
+            self.configureLayoutForCompactSizeClass()
+        } else {
+            self.configureLayoutForRegularSizeClass()
+        }
     }
+    
+    public func deactivateConstraints() {}
+    
+    public func activateConstraints() {}
+    
+    func configureLayoutForCompactSizeClass() {}
+    
+    func configureLayoutForRegularSizeClass() {}
 }

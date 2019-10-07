@@ -21,7 +21,8 @@ final class HomeViewController: BaseViewController {
     
     // Content Data
     private var sections: [SectionModel]?
-    private var storyModels: [Section: [StoryModel]]? // [SECTION_ID : STORY_MODEL]
+    private var announcements: [AnnouncementModel]?
+    private var stories: [Section: [StoryModel]]?
     
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: self.collectionViewCompositionalLayout)
@@ -29,7 +30,6 @@ final class HomeViewController: BaseViewController {
         collectionView.allowsMultipleSelection = false
         collectionView.allowsSelection = true
         collectionView.delaysContentTouches = true
-        collectionView.refreshControl = self.refreshControl
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         
         collectionView.delegate = self
@@ -38,6 +38,7 @@ final class HomeViewController: BaseViewController {
         collectionView.register(RegularStoryCollectionViewCell.self, forCellWithReuseIdentifier: UICollectionViewCell.Id.regular.rawValue)
         collectionView.register(LargeStoryCollectionViewCell.self, forCellWithReuseIdentifier: UICollectionViewCell.Id.large.rawValue)
         collectionView.register(RankedStoryCollectionViewCell.self, forCellWithReuseIdentifier: UICollectionViewCell.Id.ranked.rawValue)
+        collectionView.register(AnnouncementCollectionViewCell.self, forCellWithReuseIdentifier: UICollectionViewCell.Id.announcement.rawValue)
         
         collectionView.register(HeaderCollectionReusableView.self, forSupplementaryViewOfKind: UICollectionReusableView.Kind.header.rawValue, withReuseIdentifier: UICollectionReusableView.Id.header.rawValue)
         collectionView.register(GroupHeaderCollectionReusableView.self, forSupplementaryViewOfKind: UICollectionReusableView.Kind.groupHeader.rawValue, withReuseIdentifier: UICollectionReusableView.Id.groupHeader.rawValue)
@@ -54,19 +55,11 @@ final class HomeViewController: BaseViewController {
             let type = sectionModel.displayType
             let item = self.makeCollectionLayoutItem(type: type)
             let group = self.makeCollectionLayoutGroup(type: type, subItem: item)
-            let header = self.makeCollectionLayoutHeader()
+            let header = self.makeCollectionLayoutHeader(type: type)
             let section = self.makeCollectionLayoutSection(type: type, group: group, header: header)
             
             return section
         }
-    }()
-    
-    private lazy var refreshControl: UIRefreshControl = {
-        let refreshControl = UIRefreshControl()
-        refreshControl.tintColor = UIColor(named: "Text")
-        refreshControl.addTarget(self, action: #selector(self.handleRefreshControl(_:)), for: UIControl.Event.valueChanged)
-        
-        return refreshControl
     }()
     
     private let activityIndicatorView: UIActivityIndicatorView = {
@@ -104,12 +97,13 @@ extension HomeViewController {
         
         // Extend layout past navigation and tab bars
         self.extendedLayoutIncludesOpaqueBars = true
-        self.edgesForExtendedLayout = [.top, .bottom]
+        self.edgesForExtendedLayout = [.top]
     }
 }
 
 // MARK: View Layout & Constraints
 extension HomeViewController {
+    
     override func configureViews() {
         super.configureViews()
         
@@ -122,9 +116,6 @@ extension HomeViewController {
     override func configureLayout() {
         super.configureLayout()
         
-        NSLayoutConstraint.deactivate(self.collectionViewConstraints)
-        NSLayoutConstraint.deactivate(self.activityIndicatorViewConstraints)
-        
         self.collectionViewConstraints = [
             self.collectionView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 0),
             self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 0),
@@ -136,9 +127,52 @@ extension HomeViewController {
             self.activityIndicatorView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor, constant: 0),
             self.activityIndicatorView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor, constant: 0)
         ]
+    }
+    
+    override func deactivateConstraints() {
+        super.deactivateConstraints()
+        
+        NSLayoutConstraint.deactivate(self.collectionViewConstraints)
+        NSLayoutConstraint.deactivate(self.activityIndicatorViewConstraints)
+    }
+    
+    override func activateConstraints() {
+        super.activateConstraints()
         
         NSLayoutConstraint.activate(self.collectionViewConstraints)
         NSLayoutConstraint.activate(self.activityIndicatorViewConstraints)
+    }
+    
+    override func configureLayoutForCompactSizeClass() {
+        super.configureLayoutForCompactSizeClass()
+        
+        self.viewRespectsSystemMinimumLayoutMargins = true
+        self.view.directionalLayoutMargins.leading = 8
+        self.view.directionalLayoutMargins.trailing = 8
+        
+        if let navigationController = self.navigationController {
+            navigationController.viewRespectsSystemMinimumLayoutMargins = true
+            navigationController.view.directionalLayoutMargins.leading = 8
+            navigationController.view.directionalLayoutMargins.trailing = 8
+            navigationController.navigationBar.directionalLayoutMargins.leading = 8
+            navigationController.navigationBar.directionalLayoutMargins.trailing = 8
+        }
+    }
+    
+    override func configureLayoutForRegularSizeClass() {
+        super.configureLayoutForRegularSizeClass()
+        
+        self.viewRespectsSystemMinimumLayoutMargins = false
+        self.view.directionalLayoutMargins.leading = 64
+        self.view.directionalLayoutMargins.trailing = 64
+        
+        if let navigationController = self.navigationController {
+            navigationController.viewRespectsSystemMinimumLayoutMargins = true
+            navigationController.view.directionalLayoutMargins.leading = 64
+            navigationController.view.directionalLayoutMargins.trailing = 64
+            navigationController.navigationBar.directionalLayoutMargins.leading = 64
+            navigationController.navigationBar.directionalLayoutMargins.trailing = 64
+        }
     }
 }
 
@@ -206,7 +240,7 @@ extension HomeViewController {
                 groupCount = 2
                 totalSpacing = (spacing * (groupCount - 1))
                 width = (marginedWidth - totalSpacing) / groupCount
-                height = (width * aspectRatio) + 44
+                height = (width * aspectRatio) + 40
                 itemCount = 1
                 contentInsets = NSDirectionalEdgeInsets.zero
                 supplementaryItems = []
@@ -214,7 +248,7 @@ extension HomeViewController {
                 groupCount = 1
                 totalSpacing = (spacing * (groupCount - 1))
                 width = (marginedWidth - totalSpacing) / groupCount
-                height = (width * aspectRatio) + 44
+                height = (width * (1 / aspectRatio)) + 110
                 itemCount = 1
                 contentInsets = NSDirectionalEdgeInsets.zero
                 supplementaryItems = []
@@ -247,7 +281,7 @@ extension HomeViewController {
                 groupCount = 2
                 totalSpacing = (spacing * (groupCount - 1))
                 width = (marginedWidth - totalSpacing) / groupCount
-                height = (width * aspectRatio) + 44
+                height = (width * (1 / aspectRatio)) + 110
                 itemCount = 1
                 contentInsets = NSDirectionalEdgeInsets.zero
                 supplementaryItems = []
@@ -280,8 +314,8 @@ extension HomeViewController {
         return group
     }
     
-    private func makeCollectionLayoutSection(type: SectionDisplayType, group: NSCollectionLayoutGroup, header: NSCollectionLayoutBoundarySupplementaryItem) -> NSCollectionLayoutSection {
-        let boundarySupplementaryItems = [header]
+    private func makeCollectionLayoutSection(type: SectionDisplayType, group: NSCollectionLayoutGroup, header: NSCollectionLayoutBoundarySupplementaryItem?) -> NSCollectionLayoutSection {
+        let boundarySupplementaryItems = header == nil ? [] : [header!]
         let contentInsets = NSDirectionalEdgeInsets(
             top: 0,
             leading: self.view.layoutMargins.left,
@@ -321,7 +355,11 @@ extension HomeViewController {
         return groupHeader
     }
     
-    private func makeCollectionLayoutHeader() -> NSCollectionLayoutBoundarySupplementaryItem {
+    private func makeCollectionLayoutHeader(type: SectionDisplayType) -> NSCollectionLayoutBoundarySupplementaryItem? {
+        if type == .large {
+            return nil
+        }
+        
         let headerSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .estimated(44))
@@ -344,20 +382,35 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        guard
-            let section = self.sections?[optional: section],
-            let storyModels = self.storyModels?[section.type] else
-        {
-            return 0
+        guard let section = self.sections?[optional: section] else { return 0 }
+        
+        if section.type == .announcements {
+            guard let announcements = self.announcements else { return 0 }
+            
+            return announcements.count
         }
+        
+        guard let storyModels = self.stories?[section.type] else { return 0 }
         
         return storyModels.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let section = self.sections?[optional: indexPath.section] else { return UICollectionViewCell() }
+        
+        if section.type == .announcements {
+            guard let announcement = self.announcements?[optional: indexPath.row] else { return UICollectionViewCell() }
+            
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: UICollectionViewCell.Id.announcement.rawValue, for: indexPath) as! AnnouncementCollectionViewCell
+            cell.backgroundColor = UIColor(named: "Background")
+            cell.contentView.backgroundColor = UIColor(named: "Background")
+            cell.set(announcement, imageService: self.imageService)
+            
+            return cell
+        }
+        
         guard
-            let section = self.sections?[optional: indexPath.section],
-            let storyModels = self.storyModels?[section.type],
+            let storyModels = self.stories?[section.type],
             let storyModel = storyModels[optional: indexPath.row] else
         {
             return UICollectionViewCell()
@@ -393,12 +446,12 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard
             let section = self.sections?[optional: indexPath.section],
-            let storyModels = self.storyModels?[section.type]
+            let storyModels = self.stories?[section.type]
         else {
             return
         }
         
-        let storyPreviewViewController = StoryPreviewViewController(firstIndex: indexPath.item, storyModels: storyModels, imageService: self.imageService)
+        let storyPreviewViewController = StoryPreviewViewController(firstIndex: indexPath.item, storyModels: storyModels, userService: self.userService, imageService: self.imageService)
         
         self.navigationController?.pushViewController(storyPreviewViewController, animated: true)
     }
@@ -406,7 +459,7 @@ extension HomeViewController: UICollectionViewDelegate, UICollectionViewDataSour
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard
             let section = self.sections?[optional: indexPath.section],
-            let storyModel = self.storyModels?[section.type]?[optional: indexPath.row * 5] else
+            let storyModel = self.stories?[section.type]?[optional: indexPath.row * 5] else
         {
             return UICollectionReusableView()
         }
@@ -438,14 +491,22 @@ extension HomeViewController {
     private func loadData(_ completion: @escaping() -> ()) {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1) {
             self.sections = [
+                SectionModel(section: .announcements),
                 SectionModel(section: .recentlyRead),
                 SectionModel(section: .recommendedForYou),
                 SectionModel(section: .topStories),
-                SectionModel(section: .newStories),
+                SectionModel(section: .newForYou),
                 SectionModel(section: .trendingStories)
             ]
             
-            self.storyModels = [
+            self.announcements = [
+                AnnouncementModel(id: "000", dateCreated: Date(), dateUpdated: Date(), title: "MONTHLY CONTEST", headline: "October Contest - Horror", subheadline: "Finished!"),
+                AnnouncementModel(id: "001", dateCreated: Date(), dateUpdated: Date(), title: "NEW STORY", headline: "Expired", subheadline: "John Doe"),
+                AnnouncementModel(id: "002", dateCreated: Date(), dateUpdated: Date(), title: "FEATURED AUTHOR", headline: "Theodore Gallao", subheadline: "Reaches 100,000 followers"),
+                AnnouncementModel(id: "003", dateCreated: Date(), dateUpdated: Date(), title: "MONTHLY CONTEST", headline: "October Contest - Horror", subheadline: "Begins!"),
+            ]
+            
+            self.stories = [
                 // Recently Read section
                 .recentlyRead: [
                     StoryModel(id: "000", dateCreated: Date(), dateUpdated: Date(), title: "Test Title 0", description: "Test Description 0", author: UserModel(id: "000", dateCreated: Date(), dateUpdated: Date(), firstName: "Test", lastName: "Name 0"), genre: .adventure, tags: nil, text: "Test text 0", viewCount: 0, likeCount: 0, dislikeCount: 0, commentCount: 0, comments: nil),
@@ -489,7 +550,7 @@ extension HomeViewController {
                 ],
                 
                 // New Stories section
-                .newStories: [
+                .newForYou: [
                     StoryModel(id: "000", dateCreated: Date(), dateUpdated: Date(), title: "Test Title 0", description: "Test Description 0", author: UserModel(id: "000", dateCreated: Date(), dateUpdated: Date(), firstName: "Test", lastName: "Name 0"), genre: .adventure, tags: nil, text: "Test text 0", viewCount: 0, likeCount: 0, dislikeCount: 0, commentCount: 0, comments: nil),
                     StoryModel(id: "001", dateCreated: Date(), dateUpdated: Date(), title: "Test Title 1", description: "Test Description 1", author: UserModel(id: "001", dateCreated: Date(), dateUpdated: Date(), firstName: "Test", lastName: "Name 1"), genre: .adventure, tags: nil, text: "Test text 1", viewCount: 0, likeCount: 0, dislikeCount: 0, commentCount: 0, comments: nil),
                     StoryModel(id: "002", dateCreated: Date(), dateUpdated: Date(), title: "Test Title 2", description: "Test Description 2", author: UserModel(id: "002", dateCreated: Date(), dateUpdated: Date(), firstName: "Test", lastName: "Name 2"), genre: .adventure, tags: nil, text: "Test text 2", viewCount: 0, likeCount: 0, dislikeCount: 0, commentCount: 0, comments: nil),
@@ -528,7 +589,7 @@ extension HomeViewController {
     
     func load(completion: (() -> ())?) {
         self.sections?.removeAll()
-        self.storyModels?.removeAll()
+        self.stories?.removeAll()
         self.collectionView.reloadData()
         
         self.activityIndicatorView.startAnimating()
@@ -537,16 +598,5 @@ extension HomeViewController {
             self.collectionView.reloadData()
             completion?()
         }
-    }
-    
-    @objc private func handleRefreshControl(_ sender: UIRefreshControl) {
-        self.loadData {
-            self.collectionView.reloadData()
-            sender.endRefreshing()
-        }
-    }
-    
-    @objc private func handleComposeButton(_ sender: UIButton) {
-        
     }
 }
