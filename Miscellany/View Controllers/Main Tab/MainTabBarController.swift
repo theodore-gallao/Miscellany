@@ -26,6 +26,49 @@ class MainTabBarController: BaseTabBarController {
             imageService: self.imageService,
             settingsManager: self.settingsManager)
         let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.navigationBar.prefersLargeTitles = true
+        
+        let standard = UINavigationBarAppearance()
+        standard.configureWithDefaultBackground()
+        standard.backgroundColor = UIColor(named: "Background")
+        standard.shadowColor = .opaqueSeparator
+        standard.titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 18, weight: .heavy)]
+        standard.largeTitleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 34, weight: .heavy)]
+        
+        
+        let scrollEdge = UINavigationBarAppearance()
+        scrollEdge.configureWithTransparentBackground()
+        scrollEdge.shadowColor = nil
+        scrollEdge.titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 18, weight: .heavy)]
+        scrollEdge.largeTitleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 34, weight: .heavy)]
+        
+        navigationController.navigationBar.standardAppearance = standard
+        navigationController.navigationBar.scrollEdgeAppearance = scrollEdge
+        
+        let compactInline = UITabBarItemAppearance(style: .compactInline)
+        compactInline.selected.iconColor = UIColor(named: "Primary")
+        compactInline.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Primary") ?? .systemRed]
+        
+        compactInline.normal.iconColor = UIColor.secondaryLabel
+        compactInline.normal.titleTextAttributes = [
+            .foregroundColor: UIColor.secondaryLabel]
+        
+        let image = UIImage(named: "Home")
+        let item = UITabBarItem(title: nil, image: image, selectedImage: image)
+        item.imageInsets = UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0)
+        navigationController.tabBarItem = item
+        
+        return navigationController
+    }()
+    
+    private lazy var searchNavigationController: UINavigationController = {
+        let viewController = SearchViewController(imageService: self.imageService)
+        let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.navigationBar.barStyle = .default
         navigationController.navigationBar.tintColor = UIColor(named: "Primary")
         navigationController.navigationBar.barTintColor = UIColor(named: "Background")
@@ -39,17 +82,8 @@ class MainTabBarController: BaseTabBarController {
             NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: UIFont.Weight.black)
         ]
         
-        let item = UITabBarItem(title: nil, image: UIImage(named: "Home"), selectedImage: UIImage(named: "Home"))
-        item.imageInsets = UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0)
-        navigationController.tabBarItem = item
-        
-        return navigationController
-    }()
-    
-    private lazy var searchNavigationController: UINavigationController = {
-        let viewController = UIViewController()
-        let navigationController = UINavigationController(rootViewController: viewController)
-        let item = UITabBarItem(title: nil, image: UIImage(named: "Search"), selectedImage: UIImage(named: "Search"))
+        let image = UIImage(named: "Search")
+        let item = UITabBarItem(title: nil, image: image, selectedImage: image)
         item.imageInsets = UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0)
         navigationController.tabBarItem = item
         
@@ -66,9 +100,23 @@ class MainTabBarController: BaseTabBarController {
     }()
     
     private lazy var inboxNavigationController: UINavigationController = {
-        let viewController = UIViewController()
+        let viewController = NotificationViewController()
         let navigationController = UINavigationController(rootViewController: viewController)
-        let item = UITabBarItem(title: nil, image: UIImage(named: "Inbox"), selectedImage: UIImage(named: "Inbox"))
+        navigationController.navigationBar.barStyle = .default
+        navigationController.navigationBar.tintColor = UIColor(named: "Primary")
+        navigationController.navigationBar.barTintColor = UIColor(named: "Background")
+        navigationController.navigationBar.isTranslucent = false
+        navigationController.navigationBar.prefersLargeTitles = true
+        navigationController.navigationBar.shadowImage = UIImage()
+        navigationController.navigationBar.titleTextAttributes = [
+             NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: UIFont.Weight.black)
+        ]
+        navigationController.navigationBar.largeTitleTextAttributes = [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: UIFont.Weight.black)
+        ]
+        
+        let image = UIImage(named: "Bell")
+        let item = UITabBarItem(title: nil, image: image, selectedImage: image)
         item.imageInsets = UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0)
         navigationController.tabBarItem = item
         
@@ -76,9 +124,23 @@ class MainTabBarController: BaseTabBarController {
     }()
     
     private lazy var libraryNavigationController: UINavigationController = {
-        let viewController = UIViewController()
+        let viewController = MenuViewController()
         let navigationController = UINavigationController(rootViewController: viewController)
-        let item = UITabBarItem(title: nil, image: UIImage(named: "Library"), selectedImage: UIImage(named: "Library"))
+        navigationController.navigationBar.barStyle = .default
+        navigationController.navigationBar.tintColor = UIColor(named: "Primary")
+        navigationController.navigationBar.barTintColor = UIColor(named: "Background")
+        navigationController.navigationBar.isTranslucent = false
+        navigationController.navigationBar.prefersLargeTitles = true
+        navigationController.navigationBar.shadowImage = UIImage()
+        navigationController.navigationBar.titleTextAttributes = [
+             NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: UIFont.Weight.black)
+        ]
+        navigationController.navigationBar.largeTitleTextAttributes = [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: UIFont.Weight.black)
+        ]
+        
+        let image = UIImage(named: "More")
+        let item = UITabBarItem(title: nil, image: image, selectedImage: image)
         item.imageInsets = UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0)
         navigationController.tabBarItem = item
         
@@ -87,10 +149,10 @@ class MainTabBarController: BaseTabBarController {
     
     // MARK: Initializers
     init(
-        userService: UserService,
-        storyService: StoryService,
-        imageService: ImageService,
-        settingsManager: SettingsManager)
+        userService: UserService = .shared,
+        storyService: StoryService = .shared,
+        imageService: ImageService = .shared,
+        settingsManager: SettingsManager = .shared)
     {
         self.userService = userService
         self.storyService = storyService
@@ -105,15 +167,25 @@ class MainTabBarController: BaseTabBarController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    // MARK: View Controller States
-    override func viewDidLoad() {
-        super.viewDidLoad()
+}
+
+// MARK: Views, Layout & Constraints
+extension MainTabBarController {
+    override func configureViews() {
+        super.configureViews()
         
         self.view.backgroundColor = UIColor(named: "Background")
         
         self.configureViewControllers()
         self.configureTabBar()
+    }
+    
+    override func configureViewsForCompactSizeClass() {
+        super.configureViewsForCompactSizeClass()
+    }
+    
+    override func configureViewsForRegularSizeClass() {
+        super.configureViewsForRegularSizeClass()
     }
     
     private func configureViewControllers() {
@@ -133,73 +205,50 @@ class MainTabBarController: BaseTabBarController {
     }
     
     private func configureTabBarAppearance() {
-        self.tabBar.tintColor = UIColor(named: "Primary")
-        self.tabBar.barTintColor = UIColor(named: "Background")
-        self.tabBar.unselectedItemTintColor = UIColor(named: "Unselected")
-        self.tabBar.isTranslucent = false
-        self.tabBar.shadowImage = UIImage()
-        self.tabBar.layer.borderWidth = 0
-        self.tabBar.clipsToBounds = true
+        let stacked = UITabBarItemAppearance(style: .stacked)
+        stacked.selected.iconColor = UIColor(named: "Primary")
+        stacked.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Primary") ?? .systemRed]
+        stacked.normal.iconColor = UIColor(named: "Unselected")
+        stacked.normal.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Unselected") ?? UIColor.secondaryLabel]
+        
+        let inline = UITabBarItemAppearance(style: .inline)
+        inline.selected.iconColor = UIColor(named: "Primary")
+        inline.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Primary") ?? .systemRed]
+        inline.normal.iconColor = UIColor(named: "Unselected")
+        inline.normal.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Unselected") ?? UIColor.secondaryLabel]
+        
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(named: "Background")
+        appearance.shadowColor = .opaqueSeparator
+        appearance.stackedLayoutAppearance = stacked
+        appearance.compactInlineLayoutAppearance = stacked
+        appearance.inlineLayoutAppearance = inline
+        
+        self.tabBar.standardAppearance = appearance
     }
 }
 
-extension MainTabBarController {
-    override func configureLayoutForCompactSizeClass() {
-        super.configureLayoutForCompactSizeClass()
-        
-        self.viewRespectsSystemMinimumLayoutMargins = true
-        self.view.directionalLayoutMargins.leading = 8
-        self.view.directionalLayoutMargins.trailing = 8
-        
-        if let navigationController = self.navigationController {
-            navigationController.viewRespectsSystemMinimumLayoutMargins = true
-            navigationController.view.directionalLayoutMargins.leading = 8
-            navigationController.view.directionalLayoutMargins.trailing = 8
-            navigationController.navigationBar.directionalLayoutMargins.leading = 8
-            navigationController.navigationBar.directionalLayoutMargins.trailing = 8
-        }
-    }
-    
-    override func configureLayoutForRegularSizeClass() {
-        super.configureLayoutForRegularSizeClass()
-        
-        self.viewRespectsSystemMinimumLayoutMargins = false
-        self.view.directionalLayoutMargins.leading = 64
-        self.view.directionalLayoutMargins.trailing = 64
-        
-        if let navigationController = self.navigationController {
-            navigationController.viewRespectsSystemMinimumLayoutMargins = true
-            navigationController.view.directionalLayoutMargins.leading = 64
-            navigationController.view.directionalLayoutMargins.trailing = 64
-            navigationController.navigationBar.directionalLayoutMargins.leading = 64
-            navigationController.navigationBar.directionalLayoutMargins.trailing = 64
-        }
-    }
-}
-
-extension MainTabBarController : UITabBarControllerDelegate {
-    func tabBarController(
-        _ tabBarController: UITabBarController,
-        shouldSelect viewController: UIViewController) -> Bool
-    {
+extension MainTabBarController: UITabBarControllerDelegate {
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         if viewController is ComposeViewController {
-            if let currentUser = self.userService.currentUser {
-                print(currentUser.id)
-                self.presentComposeViewController()
+            if self.userService.currentUser?.isAnonymous ?? true {
+                let composeViewController = ComposeViewController()
+                let navigationController = UINavigationController(rootViewController: composeViewController)
+                navigationController.modalPresentationStyle = .pageSheet
+                
+                self.present(navigationController, animated: true, completion: nil)
             } else {
-                self.userService.presentSignIn(in: self)
+                print("non anonymous user")
             }
             
             return false
         }
         
         return true
-    }
-    
-    private func presentComposeViewController() {
-        let navigationController = UINavigationController(rootViewController: ComposeViewController())
-        navigationController.modalPresentationStyle = .pageSheet
-        
-        self.present(navigationController, animated: true, completion: nil)
     }
 }

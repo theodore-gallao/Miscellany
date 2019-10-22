@@ -21,14 +21,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use a UIHostingController as window root view controller
         guard let windowScene = scene as? UIWindowScene else { return }
         
-        let mainTabBarController = MainTabBarController(
-            userService: UserService.shared,
-            storyService: StoryService.shared,
-            imageService: ImageService.shared,
-            settingsManager: SettingsManager.shared)
-        
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = mainTabBarController
+        window.rootViewController = MainTabBarController()
         self.window = window
         window.makeKeyAndVisible()
     }
@@ -61,6 +55,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
 
         // Save changes in the application's managed object context when the application transitions to the background.
+        
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
     }
 }

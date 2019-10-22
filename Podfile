@@ -13,6 +13,7 @@ target 'Miscellany' do
   pod 'Firebase/Analytics'
   pod 'Firebase/Firestore'
   pod 'Firebase/Storage'
+  pod 'Firebase/Auth'
 
   target 'MiscellanyTests' do
     inherit! :search_paths

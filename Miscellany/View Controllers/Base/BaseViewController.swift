@@ -18,6 +18,10 @@ import UIKit
     /// Override this method to confiure the `UIView`and its subviews of this `BaseViewController`. This is mainly used to add subviews set this view's properties.
     func configureViews()
     
+    func configureViewsForCompactSizeClass()
+    
+    func configureViewsForRegularSizeClass()
+    
     /// Override this method to configure any layout constraints. This method will be called on viewDidLoad() and traitCollectionDidChange(), so it will account for initial layout as well as adaptive layout
     func configureLayout()
     
@@ -50,19 +54,31 @@ public class BaseViewController: UIViewController {
         self.configureProperties()
         self.configureAdditional()
         
-        self.layout()
+        self.configureLayout()
     }
     
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         self.configureNavigation(animated)
+        
+        if self.traitCollection.horizontalSizeClass == .compact {
+            self.configureViewsForCompactSizeClass()
+        } else {
+            self.configureViewsForRegularSizeClass()
+        }
     }
     
     override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        self.layout()
+        self.configureLayout()
+    }
+    
+    public override func viewLayoutMarginsDidChange() {
+        super.viewLayoutMarginsDidChange()
+        
+        self.configureLayout()
     }
 }
 
@@ -71,28 +87,24 @@ extension BaseViewController: PropertyConfigurable {
 }
 
 extension BaseViewController: LayoutConfigurable {
-    private func layout() {
-        self.deactivateConstraints()
-        
-        self.configureLayout()
-        
-        if self.traitCollection.horizontalSizeClass == .compact {
-            self.configureLayoutForCompactSizeClass()
-        } else {
-            self.configureLayoutForRegularSizeClass()
-        }
-        
-        self.activateConstraints()
-    }
+    public func configureViewsForCompactSizeClass() {}
+    
+    public func configureViewsForRegularSizeClass() {}
     
     public func configureViews() {}
     
     public func configureLayout() {
+        self.deactivateConstraints()
+        
         if self.traitCollection.horizontalSizeClass == .compact {
             self.configureLayoutForCompactSizeClass()
+            self.configureViewsForCompactSizeClass()
         } else {
             self.configureLayoutForRegularSizeClass()
+            self.configureViewsForRegularSizeClass()
         }
+        
+        self.activateConstraints()
     }
     
     public func deactivateConstraints() {}

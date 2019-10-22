@@ -19,6 +19,8 @@ class StoryService {
     /// The database reference of the collection that contains all storie
     private let storiesReference: CollectionReference
     
+    private var currentUser: UserModel?
+    
     private init(storiesReference: CollectionReference) {
         self.storiesReference = storiesReference
     }

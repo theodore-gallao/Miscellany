@@ -42,6 +42,10 @@ class BaseView: UIView {
 }
 
 extension BaseView: LayoutConfigurable {
+    func configureViewsForCompactSizeClass() {}
+    
+    func configureViewsForRegularSizeClass() {}
+    
     open func configureViews() {}
 
     public func configureLayout() {

@@ -157,15 +157,6 @@ class StoryViewController: BaseViewController {
 extension StoryViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-//        self.view.layoutIfNeeded()
-//
-//        self.navigationController?.setNavigationBarHidden(true, animated: animated)
-//        self.navigationController?.setToolbarHidden(true, animated: animated)
-//
-//        UIView.animate(withDuration: 1 / 3) {
-//            self.view.layoutIfNeeded()
-//        }
     }
 }
 
@@ -195,6 +186,10 @@ extension StoryViewController {
     
     override func configureLayout() {
         super.configureLayout()
+    }
+    
+    override func configureLayoutForCompactSizeClass() {
+        super.configureLayoutForCompactSizeClass()
         
         self.scrollViewConstraints = [
             self.scrollView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 0),
@@ -340,8 +335,7 @@ private extension StoryViewController {
     }
     
     private func setTextLabel(_ text: String) {
-        let sampleText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Dolor sed viverra ipsum nunc aliquet bibendum enim. In massa tempor nec feugiat. Nunc aliquet bibendum enim facilisis gravida. Nisl nunc mi ipsum faucibus vitae aliquet nec ullamcorper. Amet luctus venenatis lectus magna fringilla. Volutpat maecenas volutpat blandit aliquam etiam erat velit scelerisque in. Egestas egestas fringilla phasellus faucibus scelerisque eleifend. Sagittis orci a scelerisque purus semper eget duis. Nulla pharetra diam sit amet nisl suscipit. Sed adipiscing diam donec adipiscing tristique risus nec feugiat in. Fusce ut placerat orci nulla. Pharetra vel turpis nunc eget lorem dolor. Tristique senectus et netus et malesuada.\n\nEtiam tempor orci eu lobortis elementum nibh tellus molestie. Neque egestas congue quisque egestas. Egestas integer eget aliquet nibh praesent tristique. Vulputate mi sit amet mauris. Sodales neque sodales ut etiam sit. Dignissim suspendisse in est ante in. Volutpat commodo sed egestas egestas. Felis donec et odio pellentesque diam. Pharetra vel turpis nunc eget lorem dolor sed viverra. Porta nibh venenatis cras sed felis eget. Aliquam ultrices sagittis orci a. Dignissim diam quis enim lobortis. Aliquet porttitor lacus luctus accumsan. Dignissim convallis aenean et tortor at risus viverra adipiscing at."
-        let attributedString = NSMutableAttributedString(string: sampleText) // text)
+        let attributedString = NSMutableAttributedString(string: text)
 
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .natural
@@ -431,8 +425,8 @@ extension StoryViewController {
     @objc private func handleLikeBarButtonItem(_ sender: UIBarButtonItem) {
         print("tap like")
         
-        if let currentUser = self.userService.currentUser {
-            print(currentUser.id)
+        if let currentUser = self.userService.currentUser, !currentUser.isAnonymous {
+            print(currentUser.uid)
         } else {
             self.userService.presentSignIn(in: self)
         }
@@ -441,8 +435,8 @@ extension StoryViewController {
     @objc private func handleDislikeBarButtonItem(_ sender: UIBarButtonItem) {
         print("tap dislike")
         
-        if let currentUser = self.userService.currentUser {
-            print(currentUser.id)
+        if let currentUser = self.userService.currentUser, !currentUser.isAnonymous {
+            print(currentUser.uid)
         } else {
             self.userService.presentSignIn(in: self)
         }

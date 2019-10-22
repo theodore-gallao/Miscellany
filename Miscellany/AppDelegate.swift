@@ -23,6 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         StoryService.shared.configure()
         UserService.shared.configure()
         ImageService.shared.configure()
+        GenreService.shared.configure()
         
         // Configure Managers
         SettingsManager.shared.configure()

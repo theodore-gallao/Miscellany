@@ -14,11 +14,13 @@ struct CommentModel: Databasable {
     var dateUpdated: Date
     
     var user: UserModel
+    
     var text: String
     
     var likeCount: Int
     var dislikeCount: Int
-    var replyCount: Int
     
-    var parentUserId: String
+    var replyCount: Int
+    var parentId: String?
+    
 }

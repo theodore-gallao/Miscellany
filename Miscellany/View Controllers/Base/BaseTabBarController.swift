@@ -19,7 +19,7 @@ public class BaseTabBarController: UITabBarController {
         self.configureProperties()
         self.configureAdditional()
         
-        self.layout()
+        self.configureLayout()
     }
     
     override public func viewWillAppear(_ animated: Bool) {
@@ -31,7 +31,7 @@ public class BaseTabBarController: UITabBarController {
     override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
-        self.layout()
+        self.configureLayout()
     }
 }
 
@@ -40,28 +40,24 @@ extension BaseTabBarController: PropertyConfigurable {
 }
 
 extension BaseTabBarController: LayoutConfigurable {
-    private func layout() {
-        self.deactivateConstraints()
-        
-        self.configureLayout()
-        
-        if self.traitCollection.horizontalSizeClass == .compact {
-            self.configureLayoutForCompactSizeClass()
-        } else {
-            self.configureLayoutForRegularSizeClass()
-        }
-        
-        self.activateConstraints()
-    }
+    public func configureViewsForCompactSizeClass() {}
+    
+    public func configureViewsForRegularSizeClass() {}
     
     public func configureViews() {}
     
     public func configureLayout() {
+        self.deactivateConstraints()
+        
         if self.traitCollection.horizontalSizeClass == .compact {
             self.configureLayoutForCompactSizeClass()
+            self.configureViewsForCompactSizeClass()
         } else {
             self.configureLayoutForRegularSizeClass()
+            self.configureViewsForRegularSizeClass()
         }
+        
+        self.activateConstraints()
     }
     
     public func deactivateConstraints() {}

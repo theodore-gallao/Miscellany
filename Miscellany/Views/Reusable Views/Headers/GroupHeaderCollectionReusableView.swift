@@ -27,7 +27,7 @@ class GroupHeaderCollectionReusableView: BaseCollectionReusableView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.backgroundColor = UIColor.clear
-        label.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.heavy)
+        label.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.bold)
         label.textColor = UIColor(named: "Text")
         label.textAlignment = .natural
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -70,14 +70,10 @@ extension GroupHeaderCollectionReusableView {
         NSLayoutConstraint.deactivate(self.titleLabelConstraints)
         
         self.titleLabelConstraints = [
-            self.titleLabel.topAnchor
-                .constraint(equalTo: self.topAnchor, constant: 0),
-            self.titleLabel.leadingAnchor
-                .constraint(equalTo: self.leadingAnchor, constant: 0),
-            self.titleLabel.trailingAnchor
-                .constraint(equalTo: self.trailingAnchor, constant: 0),
-            self.titleLabel.bottomAnchor
-                .constraint(equalTo: self.bottomAnchor, constant: 0)
+            self.titleLabel.topAnchor.constraint(equalTo: self.topAnchor),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            self.titleLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ]
         
         NSLayoutConstraint.activate(self.titleLabelConstraints)

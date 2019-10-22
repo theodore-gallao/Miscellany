@@ -2,86 +2,137 @@
 //  Section.swift
 //  Miscellany
 //
-//  Created by Theodore Gallao on 6/11/19.
+//  Created by Theodore Gallao on 10/16/19.
 //  Copyright © 2019 Theodore Gallao. All rights reserved.
 //
 
 import Foundation
+import UIKit
 
-enum SectionDisplayType: Int, Codable {
-    case regular
-    case large
-    case ranked
+class GenreService {
+    var favoriteGenres: [GenreModel]?
+    var allGenres: [GenreModel]?
+    
+    /// The singleton that represents the *only* instance of this class
+    static let shared = GenreService()
+    
+    private init() {}
+    
+    /// This function must be called *only once* and *before* any other method from this `UserService` is called
+    func configure() {}
 }
 
-enum Section: String {
-    // Used for announcements attop of the home page
-    case announcements = "Announcements"
+class QueryService {
+    /// The singleton that represents the *only* instance of this class
+    static let shared = QueryService()
     
-    // Sections related only to the user
-    case recentlyRead = "Recently Read"
-    case recommendedForYou = "Recommended For You"
-    case newForYou = "New For You"
+    private init() {}
     
-    // Ranked sections
-    case topStories = "Top Stories"
-    case trendingStories = "Trending Stories"
+    /// This function must be called *only once* and *before* any other method from this `UserService` is called
+    func configure() {}
     
-    // Sections where stories are similar to a story the user has read
-    case storiesLike = "Stories Like"
-    
-    // Sections based on genres
-    case genre = "Genre"
+    func query(for query: QueryModel, completion: @escaping(Any?) -> ()) {
+        
+    }
 }
 
-struct SectionModel {
-    // Category
-    var type: Section
-    var displayType: SectionDisplayType
-    var name: String
-    var description: String
-    var genre: Genre?
-    
-    init(section: Section, genre: Genre? = nil, storyName: String? = nil) {
-        self.type = section
-        self.displayType = SectionModel.displayType(for: section)
-        self.name = SectionModel.name(from: section, genre: genre, storyName: storyName)
-        self.description = SectionModel.description(for: section, genre: genre, storyName: storyName)
+struct QueryModel: Codable, Hashable {
+    enum Query: String, Codable {
+        case announcement
+        case story
+        case user
+        case genre
+        case tag
     }
     
-    static func displayType(for section: Section) -> SectionDisplayType {
-        switch section {
-        case .announcements: return .large
-        case .recentlyRead: return .regular
-        case .recommendedForYou: return .regular
-        case .newForYou: return .regular
-        case .topStories: return .ranked
-        case .trendingStories: return .ranked
-        case .storiesLike: return .regular
-        case .genre: return .regular
+    enum Filter: String, Codable {
+        case none
+        case id
+        case story
+        case user
+        case genre
+        case tag
+        case search
+        case dateCreated
+        case trendingScore
+    }
+    
+    enum Order: String, Codable {
+        case ascending
+        case descending
+    }
+    
+    var query: Query
+    var filter: Filter
+    var order: Order
+    var limit: Int
+}
+
+struct DisplayProperty<T: Hashable>: Hashable {
+    var compact: T
+    var standard: T
+    var large: T
+    var extraLarge: T
+    
+    init(_ allValues: T) {
+        self.compact = allValues
+        self.standard = allValues
+        self.large = allValues
+        self.extraLarge = allValues
+    }
+    
+    init(compact: T, standard: T, large: T, extraLarge: T) {
+        self.compact = compact
+        self.standard = standard
+        self.large = large
+        self.extraLarge = extraLarge
+    }
+    
+    func value(for displayMode: DisplayMode) -> T {
+        switch displayMode {
+        case .compact: return self.compact
+        case .standard: return self.standard
+        case .large: return self.large
+        case .extraLarge: return self.extraLarge
         }
     }
+}
+
+struct ItemProperties: Hashable {
+    var configuration: SectionItemCollectionViewCell.Configuration
+    var itemCount: DisplayProperty<Int>
+    var heightConstant: DisplayProperty<CGFloat>
+    var spacingConstant: DisplayProperty<CGFloat> = .init(0)
+    var imageAspectRatio: CGFloat
+    var imageCornerRadius: DisplayProperty<CGFloat>
+    var shouldIgnoreImageAspectRatioForGroupHeight: Bool
+    var textAlignment: NSTextAlignment
     
-    static func name(from section: Section, genre: Genre?, storyName: String?) -> String {
-        switch section {
-        case .storiesLike: return "Stories like \(storyName ?? "")"
-        case .genre: return genre?.rawValue ?? ""
-        default: return section.rawValue
-        }
-    }
+    var headlineAlpha: CGFloat
+    var headlineTextColor: UIColor?
+    var headlineFont: UIFont
     
-    static func description(for section: Section, genre: Genre?, storyName: String?) -> String {
-        switch section {
-        case .announcements: return "Announcements"
-        case .recentlyRead: return "Stories you might want to read again"
-        case .recommendedForYou: return "We think you'll enjoy reading these stories"
-        case .newForYou: return "Fresh from genres and authors your like"
-        case .topStories: return "The best stories from this week"
-        case .trendingStories: return "These stories have been getting attention lately"
-        case .storiesLike: return "If you liked \(storyName ?? ""), you might enjoy these stories"
-        case .genre:
-            guard let genre = genre else { return "" }
-            return "Popular \(genre.rawValue) stories"
-        }
-    }
+    var titleFont: UIFont
+}
+
+struct GroupProperties: Hashable {
+    var isHeaderEnabled: Bool
+    var columnCount: DisplayProperty<CGFloat>
+    var layoutDirection: UICollectionView.ScrollDirection
+}
+
+struct SectionProperties: Hashable {
+    var title: String?
+    var description: String?
+    var actionTitle: String?
+    var actionImage: UIImage?
+    
+    var orthagonalScrollingBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior
+    var indicatorStyle: SectionHeaderCollectionReusableView.IndicatorStyle
+}
+
+struct SectionModel: Hashable {
+    var properties: SectionProperties
+    var itemProperties: ItemProperties
+    var groupProperties: GroupProperties
 }

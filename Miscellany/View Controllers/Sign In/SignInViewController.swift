@@ -31,7 +31,7 @@ class SignInViewController: BaseViewController {
             let marginedWidth = self.view.layoutMarginsGuide.layoutFrame.width
             let isCompact = self.traitCollection.horizontalSizeClass == .compact
             let sizeClassConstant: CGFloat = isCompact ? 0 : marginedWidth * 0.2
-            let width = (marginedWidth - sizeClassConstant) * 0.75
+            let width = marginedWidth - sizeClassConstant
             let leftMargin = self.view.layoutMargins.left + (sizeClassConstant / 2)
             let rightMargin = self.view.layoutMargins.right + (sizeClassConstant / 2)
             

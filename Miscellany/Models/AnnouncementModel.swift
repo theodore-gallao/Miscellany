@@ -8,12 +8,21 @@
 
 import Foundation
 import UIKit
+
 struct AnnouncementModel: Databasable {
+    enum AnnouncementType: Int, Codable {
+        case article
+        case contest
+        case story
+        case author
+    }
+    
     var id: String
     var dateCreated: Date
     var dateUpdated: Date
     
+    var type: AnnouncementType
     var title: String
-    var headline: String
-    var subheadline: String
+    var heading: String
+    var subheading: String
 }
