@@ -5,7 +5,6 @@
 //  Created by Theodore Gallao on 10/6/19.
 //  Copyright © 2019 Theodore Gallao. All rights reserved.
 //
-
 import Foundation
 import UIKit
 
@@ -13,10 +12,10 @@ class StoryPreviewPageViewController: UIPageViewController {
     let userService: UserService
     let imageService: ImageService
     
-    let stories: [StoryModel]
+    let stories: [BaseStory]
     let firstIndex: Int
     
-    init(stories: [StoryModel], firstIndex: Int, userService: UserService, imageService: ImageService) {
+    init(stories: [BaseStory], firstIndex: Int, userService: UserService = .shared, imageService: ImageService = .shared) {
         self.userService = userService
         self.imageService = imageService
         
@@ -39,13 +38,18 @@ class StoryPreviewPageViewController: UIPageViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.view.backgroundColor = UIColor(named: "Background")
+        self.view.backgroundColor = .systemBackground
         
-        if let story = self.stories[optional: self.firstIndex] {
-            let storyPreviewViewController = StoryPreviewViewController(story: story, userService: self.userService, imageService: self.imageService)
+        if let baseStory = self.stories[optional: self.firstIndex] {
+            let storyPreviewViewController = StoryPreviewViewController()
+            storyPreviewViewController.set(baseStory)
             
             self.setViewControllers([storyPreviewViewController], direction: .forward, animated: false, completion: nil)
         }
+        
+        // Extend layout past navigation and tab bars
+        self.extendedLayoutIncludesOpaqueBars = true
+        self.edgesForExtendedLayout = [.top, .bottom]
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -65,6 +69,7 @@ extension StoryPreviewPageViewController {
             navigationController.hidesBarsOnSwipe = false
             
             navigationController.setNavigationBarHidden(false, animated: animated)
+            navigationController.navigationBar.tintColor = UIColor(named: "Primary")
             
             navigationController.setToolbarHidden(true, animated: animated)
         }
@@ -75,10 +80,13 @@ extension StoryPreviewPageViewController: UIPageViewControllerDataSource, UIPage
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         if
             let storyPreviewViewController = viewController as? StoryPreviewViewController,
-            let index = self.stories.firstIndex(where: { $0.id == storyPreviewViewController.story.id }),
-            let story = self.stories[optional: index - 1]
+            let index = self.stories.firstIndex(where: { $0.id == storyPreviewViewController.story?.id }),
+            let baseStory = self.stories[optional: index - 1]
         {
-            return StoryPreviewViewController(story: story, userService: self.userService, imageService: self.imageService)
+            let storyPreviewViewController = StoryPreviewViewController()
+            storyPreviewViewController.set(baseStory)
+            
+            return storyPreviewViewController
         }
         
         return nil
@@ -87,10 +95,13 @@ extension StoryPreviewPageViewController: UIPageViewControllerDataSource, UIPage
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         if
             let storyPreviewViewController = viewController as? StoryPreviewViewController,
-            let index = self.stories.firstIndex(where: { $0.id == storyPreviewViewController.story.id }),
-            let story = self.stories[optional: index + 1]
+            let index = self.stories.firstIndex(where: { $0.id == storyPreviewViewController.story?.id }),
+            let baseStory = self.stories[optional: index + 1]
         {
-            return StoryPreviewViewController(story: story, userService: self.userService, imageService: self.imageService)
+            let storyPreviewViewController = StoryPreviewViewController()
+            storyPreviewViewController.set(baseStory)
+            
+            return storyPreviewViewController
         }
         
         return nil

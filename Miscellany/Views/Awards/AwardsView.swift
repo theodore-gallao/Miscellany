@@ -10,11 +10,11 @@ import Foundation
 import UIKit
 
 protocol AwardsViewDelegate {
-    func awardsView(_ awardsView: AwardsView, didSelect award: AwardModel)
+    func awardsView(_ awardsView: AwardsView, didSelect award: Award)
 }
 
 class AwardsView: BaseView {
-    private(set) var awards: [AwardModel] = []
+    private(set) var awards: [Award] = []
     
     private lazy var collectionView: UICollectionView = {
         let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: self.collectionViewCompositionalLayout)
@@ -57,7 +57,7 @@ class AwardsView: BaseView {
     
     private var collectionViewConstraints = [NSLayoutConstraint]()
     
-    func set(_ awards: [AwardModel]) {
+    func set(_ awards: [Award]) {
         self.awards = awards
         
         self.collectionView.reloadData()

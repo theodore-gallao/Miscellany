@@ -1,0 +1,69 @@
+[debug] [2019-10-23T04:18:24.271Z] ----------------------------------------------------------------------
+[debug] [2019-10-23T04:18:24.273Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy
+[debug] [2019-10-23T04:18:24.273Z] CLI Version:   7.6.1
+[debug] [2019-10-23T04:18:24.273Z] Platform:      darwin
+[debug] [2019-10-23T04:18:24.273Z] Node Version:  v9.1.0
+[debug] [2019-10-23T04:18:24.274Z] Time:          Wed Oct 23 2019 00:18:24 GMT-0400 (EDT)
+[debug] [2019-10-23T04:18:24.274Z] ----------------------------------------------------------------------
+[debug] [2019-10-23T04:18:24.274Z] 
+[debug] [2019-10-23T04:18:24.283Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2019-10-23T04:18:24.283Z] > authorizing via signed-in user
+[debug] [2019-10-23T04:18:24.283Z] [iam] checking project miscellany-1cea4 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2019-10-23T04:18:24.285Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/miscellany-1cea4:testIamPermissions  
+
+[debug] [2019-10-23T04:18:24.498Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Deploying to 'miscellany-1cea4'...
+[info] 
+[info] i  deploying functions
+[info] Running command: npm --prefix "$RESOURCE_DIR" run lint
+[info] ✔  functions: Finished running predeploy script.
+[debug] [2019-10-23T04:18:27.613Z] > [functions] package.json contents: {
+  "name": "functions",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "lint": "eslint .",
+    "serve": "firebase serve --only functions",
+    "shell": "firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "8"
+  },
+  "dependencies": {
+    "firebase-admin": "^8.6.0",
+    "firebase-functions": "^3.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.12.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "firebase-functions-test": "^0.1.6"
+  },
+  "private": true
+}
+[info] i  functions: ensuring necessary APIs are enabled...
+[debug] [2019-10-23T04:18:27.614Z] >>> HTTP REQUEST GET https://serviceusage.googleapis.com/v1/projects/miscellany-1cea4/services/cloudfunctions.googleapis.com  
+ 
+[debug] [2019-10-23T04:18:27.615Z] >>> HTTP REQUEST GET https://serviceusage.googleapis.com/v1/projects/miscellany-1cea4/services/runtimeconfig.googleapis.com  
+ 
+[debug] [2019-10-23T04:18:27.899Z] <<< HTTP RESPONSE 200
+[debug] [2019-10-23T04:18:27.910Z] <<< HTTP RESPONSE 200
+[info] ✔  functions: all necessary APIs are enabled
+[debug] [2019-10-23T04:18:27.911Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/miscellany-1cea4/adminSdkConfig  
+ 
+[debug] [2019-10-23T04:18:28.158Z] <<< HTTP RESPONSE 200
+[info] i  functions: preparing functions directory for uploading...
+[debug] [2019-10-23T04:18:28.162Z] >>> HTTP REQUEST GET https://runtimeconfig.googleapis.com/v1beta1/projects/miscellany-1cea4/configs  
+ 
+[debug] [2019-10-23T04:18:28.333Z] <<< HTTP RESPONSE 200
+[debug] [2019-10-23T04:18:28.480Z] >>> HTTP REQUEST GET https://cloudfunctions.googleapis.com/v1/projects/miscellany-1cea4/locations/-/functions  
+ 
+[debug] [2019-10-23T04:18:29.074Z] <<< HTTP RESPONSE 200
+[info] 
+The following functions are found in your project but do not exist in your local source code:
+	getUserTokenForAppleLogIn(us-central1)
+
+If you are renaming a function or changing its region, it is recommended that you create the new function first before deleting the old one to prevent event loss. For more info, visit https://firebase.google.com/docs/functions/manage-functions#modify
+

@@ -34,7 +34,7 @@ class TextSettingsViewController: UIViewController {
     
     // MARK: Views
     let blurEffectView: UIVisualEffectView = {
-        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.regular)
+        let blurEffect = UIBlurEffect(style: UIBlurEffect.Style.systemMaterial)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.translatesAutoresizingMaskIntoConstraints = false
         

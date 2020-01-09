@@ -8,7 +8,9 @@
 
 import Foundation
 import UIKit
+import FirebaseAuth
 import AuthenticationServices
+import FirebaseFunctions
 
 struct FeatureInfoModel {
     var feature: String
@@ -18,34 +20,60 @@ struct FeatureInfoModel {
 }
 
 class SignInViewController: BaseViewController {
+    let userService: UserService
+    
     let features = [
-        FeatureInfoModel(feature: "PERSONALIZED EXPERIENCE", headline: "Read more stories you like", description: "We value your preferences"),
-        FeatureInfoModel(feature: "READING LIST & LIBRARY", headline: "Save your favorite stories", description: "Add them to your library, or save them for later"),
-        FeatureInfoModel(feature: "AUTHOR SUBSCRIPTION", headline: "Subscribe to your favorite authors", description: "Receive important notifications related to them"),
-        FeatureInfoModel(feature: "STORY INTERACTION", headline: "Show your interest!", description: "Like, dislike, or comment on any story"),
-        FeatureInfoModel(feature: "STORY COMPOSITION", headline: "Who knows how far you'll go?", description: "Write and publish your best stories"),
+        FeatureInfoModel(feature: "PERSONALIZED EXPERIENCE", headline: "Read more stories you like", description: "We value your interests", image: UIImage(named: "Feature 000")),
+        FeatureInfoModel(feature: "READING LIST & LIBRARY", headline: "Save you favorite stories", description: "Never forget them", image: UIImage(named: "Feature 001")),
+        FeatureInfoModel(feature: "AUTHOR SUBSCRIPTION", headline: "Follow your favorite authors", description: "Never miss their stories", image: UIImage(named: "Feature 002")),
+        FeatureInfoModel(feature: "STORY INTERACTION", headline: "Show your interest!", description: "Like, dislike, or comment on any story", image: UIImage(named: "Feature 003")),
+        FeatureInfoModel(feature: "STORY COMPOSITION", headline: "Publish your best stories", description: "Who knows how far you'll go?", image: UIImage(named: "Feature 004")),
     ]
     
-    private lazy var collectionViewCompositionalLayout: UICollectionViewCompositionalLayout = {
+    private lazy var collectionViewLayout: UICollectionViewCompositionalLayout = {
         return UICollectionViewCompositionalLayout { (sectionIndex, layouEnvironment) -> NSCollectionLayoutSection? in
+            let item = NSCollectionLayoutItem(
+                layoutSize: NSCollectionLayoutSize(
+                    widthDimension: .fractionalWidth(1.0),
+                    heightDimension: .fractionalHeight(1.0)))
+            
+            let displayMode = DisplayMode.displayMode(for: self.view.frame.width)
+            let directionalLayoutMargins = displayMode.directionalLayoutMargins
+            let groupSpacing = displayMode.spacing
+            self.view.directionalLayoutMargins = directionalLayoutMargins
+            self.navigationController?.navigationBar.directionalLayoutMargins = directionalLayoutMargins
             let marginedWidth = self.view.layoutMarginsGuide.layoutFrame.width
-            let isCompact = self.traitCollection.horizontalSizeClass == .compact
-            let sizeClassConstant: CGFloat = isCompact ? 0 : marginedWidth * 0.2
-            let width = marginedWidth - sizeClassConstant
-            let leftMargin = self.view.layoutMargins.left + (sizeClassConstant / 2)
-            let rightMargin = self.view.layoutMargins.right + (sizeClassConstant / 2)
             
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let heightMultiplier: CGFloat = 2 / 3
+            let heightConstant: CGFloat = 74
+            let numberOfColumns: CGFloat
+            switch displayMode {
+            case .compact:
+                numberOfColumns = 1
+            case .standard:
+                numberOfColumns = 1.5
+            case .large:
+                numberOfColumns = 1.5
+            case .extraLarge:
+                numberOfColumns = 2
+            }
             
-            let groupSize = NSCollectionLayoutSize(widthDimension: .absolute(width), heightDimension: .fractionalHeight(1.0))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 1)
-            group.interItemSpacing = .fixed(10)
+            let width = ((marginedWidth - (groupSpacing * (numberOfColumns - 1))) / numberOfColumns)
+            let height = ((width * heightMultiplier) + heightConstant) * 1
+            
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .absolute(width),
+                heightDimension: .absolute(height))
+            let group = NSCollectionLayoutGroup.vertical(
+                layoutSize: groupSize,
+                subitem: item,
+                count: 1)
              
             let section = NSCollectionLayoutSection(group: group)
             section.orthogonalScrollingBehavior = .groupPaging
-            section.interGroupSpacing = 10
-            section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: leftMargin, bottom: 0, trailing: rightMargin)
+            section.interGroupSpacing = groupSpacing
+            section.contentInsets = displayMode.directionalLayoutMargins
+            
             
             return section
         }
@@ -53,7 +81,7 @@ class SignInViewController: BaseViewController {
     
     // MARK: Views
     private lazy var collectionView: UICollectionView = {
-        let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: self.collectionViewCompositionalLayout)
+        let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: self.collectionViewLayout)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.backgroundColor = UIColor.clear
@@ -72,7 +100,7 @@ class SignInViewController: BaseViewController {
         label.numberOfLines = 0
         label.text = "Streamline your experience and enable Miscellany's powerful features by signing in now."
         label.backgroundColor = UIColor.clear
-        label.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.regular)
+        label.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.regular)
         label.textColor = UIColor(named: "Subtext")
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -86,6 +114,7 @@ class SignInViewController: BaseViewController {
     lazy var appleSignInButton: ASAuthorizationAppleIDButton = {
         let button = ASAuthorizationAppleIDButton(type: .signIn, style: self.traitCollection.userInterfaceStyle == .dark ? .white : .black)
         button.addTarget(self, action: #selector(self.handleAppleSignInButton(_:)), for: .touchUpInside)
+        button.cornerRadius = 22
         button.translatesAutoresizingMaskIntoConstraints = false
             
         return button
@@ -94,11 +123,11 @@ class SignInViewController: BaseViewController {
     lazy var guestSignInButton: UIButton = {
         let button = UIButton(type: .custom)
         button.addTarget(self, action: #selector(self.handleGuestSignInButton(_:)), for: .touchUpInside)
-        button.backgroundColor = UIColor(named: "Background")
+        button.backgroundColor = .clear
         button.tintColor = UIColor(named: "Primary")
         button.setTitle("Continue as a guest", for: UIControl.State.normal)
         button.setTitleColor(UIColor(named: "Primary"), for: UIControl.State.normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.bold)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.semibold)
         button.titleLabel?.textAlignment = .center
         button.translatesAutoresizingMaskIntoConstraints = false
         
@@ -115,6 +144,16 @@ class SignInViewController: BaseViewController {
     var subtitleLabelConstraints = [NSLayoutConstraint]()
     var appleSignInButtonConstraints = [NSLayoutConstraint]()
     var guestSignInButtonConstraints = [NSLayoutConstraint]()
+    
+    init(userService: UserService = .shared) {
+        self.userService = userService
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 // MARK: Views, Layout & Constraints
@@ -124,6 +163,7 @@ extension SignInViewController {
         
         let button = ASAuthorizationAppleIDButton(type: .signIn, style: self.traitCollection.userInterfaceStyle == .dark ? .white : .black)
         button.addTarget(self, action: #selector(self.handleAppleSignInButton(_:)), for: .touchUpInside)
+        button.cornerRadius = 22
         button.translatesAutoresizingMaskIntoConstraints = false
         
         self.appleSignInButton = button
@@ -136,12 +176,22 @@ extension SignInViewController {
     override func configureViews() {
         super.configureViews()
         
-        self.view.backgroundColor = UIColor(named: "Background")
+        self.view.backgroundColor = .systemBackground
         
         self.view.addSubview(self.collectionView)
         self.view.addSubview(self.subtitleLabel)
         self.view.addSubview(self.appleSignInButton)
         self.view.addSubview(self.guestSignInButton)
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { _ in
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            self.configureLayout()
+            self.view.layoutIfNeeded()
+        }, completion: nil)
     }
     
     override func configureLayout() {
@@ -178,20 +228,20 @@ extension SignInViewController {
         
         self.subtitleLabelConstraints = [
             self.subtitleLabel.bottomAnchor.constraint(equalTo: self.appleSignInButton.topAnchor, constant: -10),
-            self.subtitleLabel.leadingAnchor.constraint(equalTo: self.view.layoutMarginsGuide.leadingAnchor),
-            self.subtitleLabel.trailingAnchor.constraint(equalTo: self.view.layoutMarginsGuide.trailingAnchor),
+            self.subtitleLabel.leadingAnchor.constraint(equalTo: self.view.readableContentGuide.leadingAnchor),
+            self.subtitleLabel.trailingAnchor.constraint(equalTo: self.view.readableContentGuide.trailingAnchor),
         ]
         
         self.appleSignInButtonConstraints = [
             self.appleSignInButton.heightAnchor.constraint(equalToConstant: 44),
-            self.appleSignInButton.leadingAnchor.constraint(equalTo: self.view.layoutMarginsGuide.leadingAnchor),
-            self.appleSignInButton.trailingAnchor.constraint(equalTo: self.view.layoutMarginsGuide.trailingAnchor),
+            self.appleSignInButton.leadingAnchor.constraint(equalTo: self.view.readableContentGuide.leadingAnchor),
+            self.appleSignInButton.trailingAnchor.constraint(equalTo: self.view.readableContentGuide.trailingAnchor),
             self.appleSignInButton.bottomAnchor.constraint(equalTo: self.guestSignInButton.topAnchor, constant: -10)
         ]
         
         self.guestSignInButtonConstraints = [
-            self.guestSignInButton.leadingAnchor.constraint(equalTo: self.view.layoutMarginsGuide.leadingAnchor),
-            self.guestSignInButton.trailingAnchor.constraint(equalTo: self.view.layoutMarginsGuide.trailingAnchor),
+            self.guestSignInButton.leadingAnchor.constraint(equalTo: self.view.readableContentGuide.leadingAnchor),
+            self.guestSignInButton.trailingAnchor.constraint(equalTo: self.view.readableContentGuide.trailingAnchor),
             self.guestSignInButton.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -32)
         ]
     }
@@ -199,6 +249,31 @@ extension SignInViewController {
     override func configureLayoutForRegularSizeClass() {
         super.configureLayoutForRegularSizeClass()
         
+        self.collectionViewConstraints = [
+            self.collectionView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            self.collectionView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.collectionView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+        ]
+        
+        self.subtitleLabelConstraints = [
+            self.subtitleLabel.bottomAnchor.constraint(equalTo: self.appleSignInButton.topAnchor, constant: -10),
+            self.subtitleLabel.leadingAnchor.constraint(equalTo: self.view.readableContentGuide.leadingAnchor),
+            self.subtitleLabel.trailingAnchor.constraint(equalTo: self.view.readableContentGuide.trailingAnchor),
+        ]
+        
+        self.appleSignInButtonConstraints = [
+            self.appleSignInButton.heightAnchor.constraint(equalToConstant: 50),
+            self.appleSignInButton.leadingAnchor.constraint(equalTo: self.view.readableContentGuide.leadingAnchor),
+            self.appleSignInButton.trailingAnchor.constraint(equalTo: self.view.readableContentGuide.trailingAnchor),
+            self.appleSignInButton.bottomAnchor.constraint(equalTo: self.guestSignInButton.topAnchor, constant: -10)
+        ]
+        
+        self.guestSignInButtonConstraints = [
+            self.guestSignInButton.leadingAnchor.constraint(equalTo: self.view.readableContentGuide.leadingAnchor),
+            self.guestSignInButton.trailingAnchor.constraint(equalTo: self.view.readableContentGuide.trailingAnchor),
+            self.guestSignInButton.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -32)
+        ]
     }
 }
 
@@ -212,20 +287,9 @@ extension SignInViewController {
         self.navigationItem.setRightBarButton(self.notNowButton, animated: animated)
         
         if let navigationController = self.navigationController {
-            navigationController.view.backgroundColor = UIColor(named: "Background")
             navigationController.setNavigationBarHidden(false, animated: animated)
-            navigationController.navigationBar.barStyle = .default
-            navigationController.navigationBar.tintColor = UIColor(named: "Primary")
-            navigationController.navigationBar.barTintColor = UIColor(named: "Background")
-            navigationController.navigationBar.isTranslucent = false
             navigationController.navigationBar.prefersLargeTitles = true
-            navigationController.navigationBar.shadowImage = UIImage()
-            navigationController.navigationBar.titleTextAttributes = [
-                 NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18, weight: UIFont.Weight.black)
-            ]
-            navigationController.navigationBar.largeTitleTextAttributes = [
-                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 34, weight: UIFont.Weight.black)
-            ]
+            navigationController.navigationBar.tintColor = UIColor(named: "Primary")
         }
     }
 }
@@ -248,10 +312,73 @@ extension SignInViewController: UICollectionViewDataSource, UICollectionViewDele
     }
 }
 
+extension SignInViewController: ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding {
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        switch authorization.credential {
+        case let credentials as ASAuthorizationAppleIDCredential:
+            let subscriptions = [
+                BaseUser(id: "000", firstName: "Jonathan", lastName: "Appleseed", username: "j_appleseed"),
+                BaseUser(id: "001", firstName: "Linda", lastName: "Mendes", username: "_itslinda"),
+                BaseUser(id: "002", firstName: "Arthur", lastName: "Adams", username: "real_arthur_adams"),
+                BaseUser(id: "003", firstName: "Abigail", lastName: "Larsson", username: "abbylarson94"),
+                BaseUser(id: "004", firstName: "Eric", lastName: "Cruz",  username: "cruzing_")
+            ]
+                
+            let likedGenres = [
+                BaseGenre(id: "000", title: "Adventure", storyCount: 0),
+                BaseGenre(id: "002", title: "Fantasy", storyCount: 0),
+                BaseGenre(id: "003", title: "Horror", storyCount: 0),
+                BaseGenre(id: "005", title: "Mystery", storyCount: 0),
+                BaseGenre(id: "007", title: "Science Fiction", storyCount: 0),
+                BaseGenre(id: "008", title: "Thriller", storyCount: 0),
+            ]
+            
+            let user = User(
+                id: credentials.user,
+                dateCreated: Date(),
+                dateUpdated: Date(),
+                isRegistered: true,
+                firstName: credentials.fullName?.givenName ?? "",
+                lastName: credentials.fullName?.familyName ?? "",
+                email: credentials.email ?? "",
+                username: "",
+                storyCount: 0,
+                subscriberCount: 0,
+                subscribedCount: 0,
+                subscriptions: subscriptions,
+                likedGenres: likedGenres)
+            
+            self.userService.currentUser = user
+            
+            let userFormViewController = UserFormViewController(user: user)
+            userFormViewController.isModalInPresentation = true
+            
+            self.navigationController?.pushViewController(userFormViewController, animated: true)
+        case let credentials as ASPasswordCredential:
+            break
+        default: break
+        }
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        print("authorizationController Error: \(error.localizedDescription)")
+    }
+    
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return UIWindow(frame: UIScreen.main.bounds)
+    }
+}
+
 // MARK: Selectors
 extension SignInViewController {
     @objc private func handleAppleSignInButton(_ sender: ASAuthorizationAppleIDButton) {
+        let request = ASAuthorizationAppleIDProvider().createRequest()
+        request.requestedScopes = [.fullName, .email]
         
+        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+        authorizationController.delegate = self
+        authorizationController.presentationContextProvider = self
+        authorizationController.performRequests()
     }
     
     @objc private func handleNotNowBarButtonItem(_ sender: UIBarButtonItem) {

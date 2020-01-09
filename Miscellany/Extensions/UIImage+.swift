@@ -24,38 +24,37 @@ extension UIImage {
         return image
     }
 
-//    func circularImage(size: CGSize, borderColor: UIColor) -> UIImage? {
-//        let newSize = size
-//
-//        let minEdge = min(newSize.height, newSize.width)
-//        let size = CGSize(width: minEdge, height: minEdge)
-//
-//        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
-//        let context = UIGraphicsGetCurrentContext()
-//
-//        self.draw(in: CGRect(origin: CGPoint.zero, size: size), blendMode: .copy, alpha: 1.0)
-//
-//        context?.setBlendMode(CGBlendMode.copy)
-//        context?.setFillColor(UIColor.clear.cgColor)
-//
-//        let rectPath = UIBezierPath(rect: CGRect(origin: CGPoint.zero, size: size))
-//        let circlePath = UIBezierPath(ovalIn: CGRect(origin: CGPoint.zero, size: size))
-//        rectPath.append(circlePath)
-//        rectPath.usesEvenOddFillRule = true
-//        rectPath.fill()
-//
-//        let result = UIGraphicsGetImageFromCurrentImageContext()
-//        UIGraphicsEndImageContext()
-//
-//        return result
-//    }
+    func resized(to targetSize: CGSize) -> UIImage? {
+        let size = self.size
+
+        let widthRatio  = targetSize.width  / size.width
+        let heightRatio = targetSize.height / size.height
+
+        // Figure out what our orientation is, and use that to form the rectangle
+        var newSize: CGSize
+        if(widthRatio > heightRatio) {
+            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+        } else {
+            newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+        }
+
+        // This is the rect that we've calculated out and this is what is actually used below
+        let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+
+        // Actually do the resizing to the rect using the ImageContext stuff
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+        self.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage
+    }
     
     var isPortrait:  Bool    { size.height > size.width }
     var isLandscape: Bool    { size.width > size.height }
     var breadth:     CGFloat { min(size.width, size.height) }
     var breadthSize: CGSize  { .init(width: breadth, height: breadth) }
     var breadthRect: CGRect  { .init(origin: .zero, size: breadthSize) }
-    
     var circleMasked: UIImage? {
         guard let cgImage = cgImage?
             .cropping(to: .init(origin: .init(x: isLandscape ? ((size.width-size.height)/2).rounded(.down) : 0,

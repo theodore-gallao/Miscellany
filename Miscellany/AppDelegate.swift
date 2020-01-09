@@ -28,6 +28,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Configure Managers
         SettingsManager.shared.configure()
         
+        self.configureNavigationBarAppearance()
+        self.configureToolbarAppearance()
+        self.configureTabBarAppearance()
+        
         return true
     }
 
@@ -49,6 +53,64 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+    
+    private func configureNavigationBarAppearance() {
+        let standard = UINavigationBarAppearance()
+        standard.configureWithDefaultBackground()
+        standard.backgroundEffect = UIBlurEffect(style: .systemMaterial)
+        standard.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.5)
+        standard.shadowColor = UIColor(named: "Empty")
+        standard.titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 18, weight: .heavy)]
+        standard.largeTitleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 34, weight: .heavy)]
+        
+        let scrollEdge = UINavigationBarAppearance()
+        scrollEdge.configureWithTransparentBackground()
+        scrollEdge.backgroundColor = .clear
+        scrollEdge.backgroundEffect = nil
+        scrollEdge.shadowColor = nil
+        scrollEdge.titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 18, weight: .heavy)]
+        scrollEdge.largeTitleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 34, weight: .heavy)]
+        
+        
+        UINavigationBar.appearance().standardAppearance = standard
+        UINavigationBar.appearance().scrollEdgeAppearance = scrollEdge
+    }
+    
+    private func configureToolbarAppearance() {
+        let standard = UIToolbarAppearance()
+        standard.configureWithDefaultBackground()
+        standard.backgroundEffect = UIBlurEffect(style: .systemMaterial)
+        standard.backgroundColor = UIColor(named: "Background")?.withAlphaComponent(0.5)
+        standard.shadowColor = UIColor(named: "Empty")
+        
+        UIToolbar.appearance().standardAppearance = standard
+        UIToolbar.appearance().compactAppearance = standard
+    }
+    
+    private func configureTabBarAppearance() {
+        let stacked = UITabBarItemAppearance(style: .stacked)
+        stacked.selected.iconColor = UIColor(named: "Primary")
+        stacked.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Primary") ?? .systemRed]
+        stacked.normal.iconColor = UIColor(named: "Subtext")
+        stacked.normal.titleTextAttributes = [
+            .foregroundColor: UIColor(named: "Subtext") ?? UIColor.secondaryLabel]
+        
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
+        appearance.backgroundColor = UIColor(named: "Background")?.withAlphaComponent(0.5)
+        appearance.shadowColor = UIColor(named: "Empty")
+        appearance.stackedLayoutAppearance = stacked
+        appearance.compactInlineLayoutAppearance = stacked
+        appearance.inlineLayoutAppearance = stacked
+        
+        UITabBar.appearance().standardAppearance = appearance
     }
 
     // MARK: - Core Data stack

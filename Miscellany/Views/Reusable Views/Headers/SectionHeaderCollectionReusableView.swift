@@ -101,7 +101,7 @@ class SectionHeaderCollectionReusableView: BaseCollectionReusableView {
         return button
     }()
     
-    /// If `true`, the next time the user clears, delegate method `searchHeaderCollectionReusableViewDelegate(_ searchHeaderCollectionReusableViewDelegate: SearchHeaderCollectionReusableViewDelegate, didClear button: UIButton)` will be called. Default is false
+    /// If `true`, the next time the user clears, delegate method `searchHeaderCollectionReusableViewDelegate(_:, didClear:)` will be called. Default is false
     private var shouldClear: Bool = false
     
     // Constraints

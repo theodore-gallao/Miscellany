@@ -14,15 +14,17 @@ import Firebase
 class StoryService {
     
     /// The singleton that represents the *only* instance of this class
-    static let shared = StoryService(storiesReference: Firestore.firestore().collection("stories"))
+    static let shared = StoryService(
+        storiesReference: Firestore.firestore().collection("stories"),
+        usersReference: Firestore.firestore().collection("users"))
     
     /// The database reference of the collection that contains all storie
     private let storiesReference: CollectionReference
+    private let usersReference: CollectionReference
     
-    private var currentUser: UserModel?
-    
-    private init(storiesReference: CollectionReference) {
+    private init(storiesReference: CollectionReference, usersReference: CollectionReference) {
         self.storiesReference = storiesReference
+        self.usersReference = usersReference
     }
     
     /// This function must be called *only once* and *before* any other method from this `StoryService` is called
@@ -36,5 +38,7 @@ extension StoryService {
 
 // MARK: Post
 extension StoryService {
-    
+    func post(story: Story, image: UIImage) {
+        
+    }
 }
